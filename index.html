@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LTV Calculator and Prediction</title>
-
 <h2 class="sr-only">LTV calculator — power-law retention model with funnel, ad revenue, cost structure, and confidence bands</h2>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -53,10 +52,49 @@ input[type=number]{padding:5px 8px;border:.5px solid var(--color-border-secondar
 .cg{color:var(--color-text-success)}.cy{color:var(--color-text-warning)}.cr{color:var(--color-text-danger)}.cgr{color:var(--color-text-tertiary)}
 .empty{padding:48px;text-align:center;color:var(--color-text-tertiary)}
 .fbx{margin-top:6px;padding:8px 10px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);font-size:13px}
+.nav-pill{text-decoration:none;transition:all 160ms ease-out}
+.nav-pill:hover{color:var(--blue);border-color:rgba(37,99,235,.35);transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.06)}
 
-    .nav-pill{ text-decoration:none; transition:all 160ms ease-out; }
-    .nav-pill:hover{ color:var(--blue); border-color:rgba(37,99,235,.35); transform:translateY(-1px); box-shadow:0 8px 18px rgba(15,23,42,.06); }
-  </style>
+/* ── TOOLTIP / INFO ICON ── */
+.tip-wrap{position:relative;display:inline-flex;align-items:center;margin-left:4px;vertical-align:middle}
+.tip-icon{width:15px;height:15px;border-radius:50%;background:rgba(148,163,184,.18);border:1px solid rgba(148,163,184,.35);color:#94A3B8;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;cursor:default;line-height:1;flex-shrink:0;transition:background .15s,color .15s}
+.tip-icon:hover{background:rgba(37,99,235,.12);color:#2563EB;border-color:rgba(37,99,235,.3)}
+.tip-box{display:none;position:absolute;left:20px;top:50%;transform:translateY(-50%);z-index:200;width:240px;background:#0F172A;color:#E2E8F0;font-size:11px;line-height:1.6;padding:9px 12px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.22);pointer-events:none}
+.tip-box::before{content:'';position:absolute;left:-5px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:5px solid #0F172A}
+.tip-wrap:hover .tip-box{display:block}
+/* tooltips on right side flip left when near edge */
+.tip-left .tip-box{left:auto;right:20px}
+.tip-left .tip-box::before{left:auto;right:-5px;border-right:none;border-left:5px solid #0F172A}
+.row label{display:flex;align-items:center;gap:0}
+
+/* ── SUBSCRIPTION TIERS ── */
+.sub-tier{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.sub-tier-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em}
+.sub-tier-dot{width:8px;height:8px;border-radius:50%}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sub-grid .row{margin-bottom:0}
+.sub-grid input[type=number]{width:88px}
+.split-bar{margin-top:10px;padding-top:10px;border-top:1px solid #EEF2F7}
+.split-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:#475569}
+.split-row input[type=number]{width:70px;font-size:12px;padding:5px 8px}
+.split-total{font-size:11px;margin-top:4px;padding:5px 8px;border-radius:8px}
+.split-ok{background:rgba(22,163,74,.08);color:#16A34A}
+.split-err{background:rgba(220,38,38,.08);color:#DC2626}
+
+/* Monetization toggle button */
+.mon-toggle-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid #E2E8F0;background:#fff;color:#475569;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s}
+.mon-toggle-btn:hover{border-color:rgba(37,99,235,.4);color:#2563EB}
+.mon-toggle-btn.active{background:#0F172A;color:#fff;border-color:#0F172A}
+.mon-section{display:none;margin-top:10px}
+.mon-section.open{display:block}
+.mon-src-block{border:1px solid #EEF2F7;border-radius:14px;padding:12px 14px;margin-bottom:10px;background:#FAFBFD}
+.mon-src-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.mon-src-title{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.mon-src-dot{width:7px;height:7px;border-radius:50%}
+
+/* Results extra rows */
+.mc8{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+</style>
 
 <style>
 :root{
@@ -67,92 +105,128 @@ input[type=number]{padding:5px 8px;border:.5px solid var(--color-border-secondar
   --color-background-warning:rgba(245,158,11,.12);--color-text-warning:#B45309;
   --color-background-danger:rgba(220,38,38,.10);--color-text-danger:#DC2626;
   --color-text-info:#2563EB;--border-radius-md:14px;--border-radius-lg:22px;--font-mono:"IBM Plex Mono","Roboto Mono",ui-monospace,Menlo,monospace;
+  --blue:#2563EB;
 }
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:#0F172A;background:radial-gradient(circle at 8% 0%,rgba(37,99,235,.10),transparent 30%),radial-gradient(circle at 94% 8%,rgba(22,163,74,.08),transparent 25%),linear-gradient(180deg,#fff 0%,#F8FAFC 38%,#F8FAFC 100%)}
 .page-shell{max-width:1440px;margin:0 auto;padding:28px 28px 72px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px;padding:14px 18px;border:1px solid rgba(226,232,240,.9);border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(15,23,42,.05);backdrop-filter:blur(14px);position:sticky;top:16px;z-index:20}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}.brand-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:13px;color:white;background:linear-gradient(135deg,#2563EB,#0F766E);box-shadow:0 12px 22px rgba(37,99,235,.24);font-size:13px}.top-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pill{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid #E2E8F0;background:#fff;color:#475569;font-size:13px;font-weight:650}.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:22px;margin-bottom:22px}.hero-card,.insight-card{background:rgba(255,255,255,.92);border:1px solid rgba(226,232,240,.9);border-radius:28px;box-shadow:0 18px 48px rgba(15,23,42,.08);backdrop-filter:blur(12px)}.hero-card{padding:44px;position:relative;overflow:hidden}.hero-card:after{content:"";position:absolute;right:-120px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.14),transparent 66%)}.eyebrow{display:inline-flex;align-items:center;margin-bottom:20px;padding:8px 12px;border-radius:999px;background:rgba(37,99,235,.10);color:#2563EB;font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:800}.hero h1{max-width:760px;font-size:clamp(42px,5vw,72px);line-height:.96;letter-spacing:-.065em;font-weight:850;margin:0 0 20px;position:relative;z-index:1}.lead{max-width:680px;color:#475569;font-size:18px;line-height:1.65;position:relative;z-index:1}.insight-card{padding:28px;display:flex;flex-direction:column;gap:18px;justify-content:space-between}.insight-title{color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:800}.insight-main{font-size:22px;line-height:1.3;letter-spacing:-.035em;font-weight:800}.insight-copy{color:#475569;line-height:1.6;font-size:14px}.calculator-shell{background:rgba(255,255,255,.72);border:1px solid rgba(226,232,240,.9);border-radius:30px;padding:18px;box-shadow:0 18px 48px rgba(15,23,42,.08)}
 #ltv{font-family:Inter,"IBM Plex Sans",system-ui,sans-serif;font-size:14px}.tabs{border:1px solid #E2E8F0;border-radius:999px;background:#F8FAFC;padding:6px;margin-bottom:16px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.tab{border-radius:999px;border:0;margin:0;padding:10px 18px;font-weight:750;color:#475569}.tab.on{background:#0F172A;color:#fff;border-bottom-color:transparent;box-shadow:0 8px 18px rgba(15,23,42,.16)}.panel{padding:0}.g2{grid-template-columns:minmax(340px,.39fr) minmax(0,.61fr);gap:16px}.sec,.mc,.roi-bx,.cbx{background:#fff;border:1px solid #E2E8F0;border-radius:22px;box-shadow:0 8px 24px rgba(15,23,42,.05)}.sec{padding:18px;margin-bottom:14px}.st{font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}.st:before{content:"";width:7px;height:7px;border-radius:50%;background:#2563EB;box-shadow:0 0 0 5px rgba(37,99,235,.10)}.row{margin-bottom:11px;gap:14px}.row label{font-weight:650;color:#475569}input[type=number]{padding:9px 10px;border:1px solid #E2E8F0;border-radius:12px;background:#fff;color:#0F172A;font-family:var(--font-mono);width:112px;outline:none}input[type=number]:focus{border-color:rgba(37,99,235,.65);box-shadow:0 0 0 4px rgba(37,99,235,.10)}.tog{background:#F1F5F9;border:1px solid #E2E8F0;border-radius:999px;padding:4px}.tog button{border-radius:999px;min-height:30px;font-weight:700}.tog button.on{background:#fff;color:#2563EB;box-shadow:0 5px 12px rgba(15,23,42,.08)}.addbtn{height:32px;padding:0 12px;border-radius:999px;background:#fff;font-weight:700}.pt-hd,.pt-row{grid-template-columns:78px 110px 32px;gap:7px}.delbtn{width:30px;height:30px;border-radius:10px}.fml,.fbx{padding:12px 14px;background:#F8FAFC;border:1px solid #EEF2F7;border-left:3px solid #2563EB;border-radius:14px}.mc4{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.mc{padding:20px;min-height:128px;position:relative;overflow:hidden}.mc:after{content:"";position:absolute;right:-36px;bottom:-48px;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.08),transparent 68%)}.mc .ml{font-size:12px;color:#94A3B8;margin-bottom:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.mc .mv{font-size:30px;font-weight:850;line-height:1.05;letter-spacing:-.045em;font-family:var(--font-mono)}.mc .ms{font-size:12px;color:#94A3B8;margin-top:8px}.roi-bx,.cbx{padding:20px;margin-bottom:16px}.roi-g{gap:14px}.roi-g>div{padding:16px;border:1px solid #EEF2F7;border-radius:14px;background:#F8FAFC}.rl{font-size:12px;color:#94A3B8;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.rv{font-size:26px;font-weight:850;font-family:var(--font-mono);letter-spacing:-.04em;margin-top:6px}.rs{font-size:12px;color:#94A3B8;margin-top:5px}.ct{font-size:18px;font-weight:800;letter-spacing:-.03em}.cs{font-size:13px;color:#94A3B8;margin-bottom:14px}.bdg{display:inline-flex;align-items:center;min-height:30px;font-size:12px;font-weight:800;padding:0 12px;border-radius:999px}.empty{border:1px solid #E2E8F0;border-radius:22px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)}.decision-card{margin:0 0 16px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,#0F172A,#172554);color:white;box-shadow:0 18px 48px rgba(15,23,42,.12);position:relative;overflow:hidden}.decision-card:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-100px;top:-110px;background:radial-gradient(circle,rgba(59,130,246,.34),transparent 62%)}.decision-label{color:#93C5FD;text-transform:uppercase;font-size:11px;font-weight:850;letter-spacing:.08em;margin-bottom:8px;position:relative;z-index:1}.decision-text{color:#E2E8F0;font-size:14px;line-height:1.65;position:relative;z-index:1}.footer-note{margin-top:18px;text-align:center;color:#94A3B8;font-size:12px}.cg{color:#16A34A!important}.cy{color:#B45309!important}.cr{color:#DC2626!important}.cgr{color:#94A3B8!important}@media(max-width:1080px){.hero{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.mc4{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.page-shell{padding:16px 14px 48px}.topbar{border-radius:22px;align-items:flex-start;flex-direction:column}.hero-card,.insight-card{padding:26px;border-radius:24px}.mc4,.roi-g{grid-template-columns:1fr}.calculator-shell{padding:12px;border-radius:24px}.pt-hd,.pt-row{grid-template-columns:1fr 1fr 32px}}
 </style>
-
-
 </head>
 <body>
 <main class="page-shell">
   <header class="topbar">
     <div class="brand"><div class="brand-mark">LTV</div><span>LTV Calculator and Prediction</span></div>
-    <div class="top-meta"><span class="pill">Power-law retention</span><span class="pill">Subscription economics</span><span class="pill">UA payback model</span>
-        <a class="pill nav-pill" href="methodology.html">Methodology</a></div>
+    <div class="top-meta">
+      <span class="pill">Power-law retention</span>
+      <span class="pill">Subscription economics</span>
+      <span class="pill">UA payback model</span>
+      <a class="pill nav-pill" href="methodology.html">Methodology</a>
+    </div>
   </header>
   <section class="hero">
     <div class="hero-card">
-      <div class="eyebrow">Growth & Unit Economics Workstation</div>
+      <div class="eyebrow">Growth &amp; Unit Economics Workstation</div>
       <h1>LTV Calculator and Prediction</h1>
       <p class="lead">Forecast subscription economics, retention decay, payback, ROAS and long-term cohort value before scaling user acquisition.</p>
     </div>
     <aside class="insight-card">
       <div><div class="insight-title">Decision layer</div><div class="insight-main">Turn retention points into a capital allocation signal.</div></div>
-      <p class="insight-copy">Use cohort size, CAC, funnel conversion, ARPPU, refunds, taxes and fixed costs to understand whether the acquisition model can scale.</p>
+      <p class="insight-copy">Use cohort size, CAC, funnel conversion, subscription tiers, ad mediation and in-app purchases to understand whether the acquisition model can scale.</p>
     </aside>
   </section>
   <section class="calculator-shell">
 <div id="ltv">
 <div class="tabs">
-  <button class="tab on" id="tab-s" onclick="sw('s')"><i class="ti ti-settings" aria-hidden="true"></i> Setup</button>
-  <button class="tab" id="tab-r" onclick="sw('r')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Results</button>
+  <button class="tab on" id="tab-s" onclick="sw('s')">&#9881; Setup</button>
+  <button class="tab" id="tab-r" onclick="sw('r')">&#9656; Results</button>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center;padding-bottom:8px" id="fit-info"></div>
 </div>
 
+<!-- ═══════════ SETUP PANEL ═══════════ -->
 <div class="panel on" id="p-s">
  <div class="g2">
   <div>
+
+   <!-- COHORT & HORIZON -->
    <div class="sec">
-    <div class="sh"><span class="st">Cohort & horizon</span></div>
-    <div class="row"><label>Cohort size</label><input type="number" id="i-co" value="100000" min="1" oninput="upd()"></div>
-    <div class="row"><label>CAC ($)</label><input type="number" id="i-ca" value="18.54" step="0.01" oninput="upd()"></div>
-    <div class="row"><label>Period</label>
-     <div class="tog">
-      <button class="on" id="tw" onclick="sp('week')">Weekly</button>
-      <button id="tm" onclick="sp('month')">Monthly</button>
-     </div>
+    <div class="sh"><span class="st">Cohort &amp; horizon</span></div>
+    <div class="row">
+      <label>Cohort size<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Total number of users acquired in this cohort (e.g. all installs in a given week). The entire LTV model is calculated per-cohort.</span></span></label>
+      <input type="number" id="i-co" value="100000" min="1" oninput="upd()">
     </div>
-    <div class="row"><label>Horizon</label>
-     <div style="display:flex;align-items:center;gap:6px">
-      <input type="number" id="i-h" value="52" min="4" max="260" style="width:70px" oninput="upd()">
-      <span id="plbl" style="font-size:13px;color:var(--color-text-secondary)">weeks</span>
-     </div>
+    <div class="row">
+      <label>CAC ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Customer Acquisition Cost — total paid UA spend divided by cohort size. Used to compute LTV/CAC ratio and payback period.</span></span></label>
+      <input type="number" id="i-ca" value="18.54" step="0.01" oninput="upd()">
+    </div>
+    <div class="row">
+      <label>Period<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Granularity of the retention model. Weekly = retention measured each week after install. Monthly = each month. Affects how subscription billing cycles are counted.</span></span></label>
+      <div class="tog">
+       <button class="on" id="tw" onclick="sp('week')">Weekly</button>
+       <button id="tm" onclick="sp('month')">Monthly</button>
+      </div>
+    </div>
+    <div class="row">
+      <label>Horizon<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">How far into the future to project the cohort. LTV, ROI and ROAS are all calculated at this horizon. Warning shown if horizon is >3× beyond your last retention data point.</span></span></label>
+      <div style="display:flex;align-items:center;gap:6px">
+       <input type="number" id="i-h" value="52" min="4" max="260" style="width:70px" oninput="upd()">
+       <span id="plbl" style="font-size:13px;color:var(--color-text-secondary)">weeks</span>
+      </div>
     </div>
    </div>
+
+   <!-- CONVERSION FUNNEL -->
    <div class="sec">
-    <div class="sh"><span class="st">Conversion funnel</span>
+    <div class="sh"><span class="st">Conversion funnel<span class="tip-wrap" style="margin-left:6px"><span class="tip-icon">i</span><span class="tip-box">Enable to model the Install → Trial → Paid conversion funnel. When disabled, 100% of the cohort is treated as payers from day 1.</span></span></span>
      <label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px;color:var(--color-text-secondary)">
       <input type="checkbox" id="i-fn" onchange="upd()"> enable
      </label>
     </div>
     <div id="ff" style="display:none">
      <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px">Install → trial → paid</div>
-     <div class="row"><label>Install → trial %</label><input type="number" id="i-tr" value="50" min="0" max="100" step="0.5" oninput="upd()"></div>
-     <div class="row"><label>Trial → paid %</label><input type="number" id="i-pd" value="40" min="0" max="100" step="0.5" oninput="upd()"></div>
+     <div class="row">
+       <label>Install → trial %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Percentage of all installs that start a free trial. Typically 5–20% for subscription apps.</span></span></label>
+       <input type="number" id="i-tr" value="50" min="0" max="100" step="0.5" oninput="upd()">
+     </div>
+     <div class="row">
+       <label>Trial → paid %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Percentage of trials that convert to a paid subscription. Typical range: 20–50%. Multiply both rates to get the overall install-to-paid conversion.</span></span></label>
+       <input type="number" id="i-pd" value="40" min="0" max="100" step="0.5" oninput="upd()">
+     </div>
      <div class="fbx" id="pb-info"></div>
     </div>
     <div id="fo" style="font-size:13px;color:var(--color-text-tertiary)">Disabled — full cohort = payer base</div>
    </div>
+
+   <!-- DEDUCTIONS & COSTS -->
    <div class="sec">
-    <div class="sh"><span class="st">Revenue per active user / period</span></div>
-    <div class="row"><label>ARPPU ($)</label><input type="number" id="i-ar" value="10.11" step="0.01" oninput="upd()"></div>
-    <div class="row"><label>Ad revenue ($)</label><input type="number" id="i-ad" value="0.30" step="0.01" oninput="upd()"></div>
+    <div class="sh"><span class="st">Deductions &amp; costs</span></div>
+    <div class="row">
+      <label>Store fee %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">App store commission on subscription revenue. Apple / Google charge 30% by default, 15% for small businesses or after 1 year. Applied only to subscription ARPPU, not to ad revenue or in-app purchases set separately.</span></span></label>
+      <input type="number" id="i-fe" value="17" min="0" max="50" style="width:70px" oninput="upd()">
+    </div>
+    <div class="row">
+      <label>VAT %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Value-added tax or digital services tax applied to revenue in your markets. Varies by region: EU 17–27%, Russia 20%, US 0% (handled at store level).</span></span></label>
+      <input type="number" id="i-vt" value="10" min="0" max="50" style="width:70px" oninput="upd()">
+    </div>
+    <div class="row">
+      <label>Refund rate %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Percentage of subscription payments that are refunded. Affects net subscription revenue. Does not apply to ad mediation revenue.</span></span></label>
+      <input type="number" id="i-rf" value="20" min="0" max="100" style="width:70px" oninput="upd()">
+    </div>
+    <div class="row">
+      <label>Fixed costs / month ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Monthly overhead not tied to user count: servers, salaries, tools. Spread across the cohort. For weekly model this is divided by 4.333 per period.</span></span></label>
+      <input type="number" id="i-fx" value="154500" step="100" oninput="upd()">
+    </div>
    </div>
+
+  </div><!-- left col -->
+
+  <div><!-- right col -->
+
+   <!-- RETENTION DATA POINTS -->
    <div class="sec">
-    <div class="sh"><span class="st">Deductions & costs</span></div>
-    <div class="row"><label>Store fee %</label><input type="number" id="i-fe" value="17" min="0" max="50" style="width:70px" oninput="upd()"></div>
-    <div class="row"><label>VAT %</label><input type="number" id="i-vt" value="10" min="0" max="50" style="width:70px" oninput="upd()"></div>
-    <div class="row"><label>Refund rate %</label><input type="number" id="i-rf" value="20" min="0" max="100" style="width:70px" oninput="upd()"></div>
-    <div class="row"><label>Fixed costs / month ($)</label><input type="number" id="i-fx" value="154500" step="100" oninput="upd()"></div>
-   </div>
-  </div>
-  <div>
-   <div class="sec">
-    <div class="sh"><span class="st">Retention data points</span>
-     <button class="addbtn" onclick="addPt()"><i class="ti ti-plus" aria-hidden="true" style="font-size:14px"></i> Add</button>
+    <div class="sh">
+      <span class="st">Retention data points<span class="tip-wrap" style="margin-left:6px"><span class="tip-icon">i</span><span class="tip-box">Enter observed retention % at each time period. The model fits a power law R(t) = a · t⁻ᵇ to these points using OLS log-log regression. Min 2 points required. More points = narrower confidence band and more accurate forecast.</span></span></span>
+      <button class="addbtn" onclick="addPt()">+ Add</button>
     </div>
     <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:12px;line-height:1.6">
      Min 2 points. Model: R(t) = a · t<sup style="font-size:9px">−b</sup><br>
@@ -165,44 +239,237 @@ body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-appl
      <div class="sm" id="fm"></div>
     </div>
    </div>
-  </div>
- </div>
-</div>
 
+   <!-- MONETIZATION SOURCES -->
+   <div class="sec">
+    <div class="sh">
+      <span class="st">Monetization sources<span class="tip-wrap" style="margin-left:6px"><span class="tip-icon">i</span><span class="tip-box">Configure all revenue streams. Subscriptions are always active. Enable Advanced mode to split into Weekly / Monthly / Annual tiers with individual prices and revenue mix, plus Ad Mediation and In-App Purchases.</span></span></span>
+      <button class="mon-toggle-btn" id="mon-adv-btn" onclick="toggleMonAdv()">&#9660; Advanced</button>
+    </div>
+
+    <!-- SIMPLE MODE (always visible) -->
+    <div id="mon-simple">
+      <div class="row">
+        <label>ARPPU ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Average Revenue Per Paying User per period — weighted average subscription price after store fee, VAT and refunds are applied. Use Advanced mode to model multiple subscription tiers separately.</span></span></label>
+        <input type="number" id="i-ar" value="10.11" step="0.01" oninput="upd()">
+      </div>
+      <div class="row">
+        <label>Ad revenue ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Ad mediation revenue per active user per period (from all ad networks combined). Applied to all active users, not just payers. Not subject to store fee or refunds.</span></span></label>
+        <input type="number" id="i-ad" value="0.30" step="0.01" oninput="upd()">
+      </div>
+    </div>
+
+    <!-- ADVANCED MODE (toggled) -->
+    <div class="mon-section" id="mon-adv">
+
+      <!-- Subscription tiers -->
+      <div style="font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;margin-top:2px;display:flex;align-items:center;gap:6px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#6366F1;display:inline-block"></span>
+        Subscription tiers
+        <span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Model up to 3 subscription tiers (Weekly, Monthly, Annual). Set the gross price and the share of new subscribers choosing each tier. Shares must sum to 100%. Revenue is automatically adjusted for store fee, VAT and refunds.</span></span>
+      </div>
+
+      <!-- Weekly tier -->
+      <div class="sub-tier">
+        <div class="sub-tier-hd"><span class="sub-tier-dot" style="background:#3B82F6"></span> Weekly</div>
+        <div class="sub-grid">
+          <div class="row"><label style="font-size:12px">Price ($)</label><input type="number" id="s-wp" value="9.99" step="0.01" oninput="upd()" style="width:88px"></div>
+          <div class="row"><label style="font-size:12px">Billing, days</label><input type="number" id="s-wd" value="7" min="1" oninput="upd()" style="width:88px"></div>
+        </div>
+        <div class="split-bar">
+          <div class="split-row"><label style="font-size:12px">Share of new subs %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">What fraction of all new subscribers choose this plan. All three shares must sum to 100%.</span></span></label><input type="number" id="s-ws" value="40" min="0" max="100" step="1" oninput="upd()" style="width:70px;font-size:12px;padding:5px 8px"></div>
+        </div>
+      </div>
+
+      <!-- Monthly tier -->
+      <div class="sub-tier">
+        <div class="sub-tier-hd"><span class="sub-tier-dot" style="background:#10B981"></span> Monthly</div>
+        <div class="sub-grid">
+          <div class="row"><label style="font-size:12px">Price ($)</label><input type="number" id="s-mp" value="19.99" step="0.01" oninput="upd()" style="width:88px"></div>
+          <div class="row"><label style="font-size:12px">Billing, days</label><input type="number" id="s-md" value="30" min="1" oninput="upd()" style="width:88px"></div>
+        </div>
+        <div class="split-bar">
+          <div class="split-row"><label style="font-size:12px">Share of new subs %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">What fraction of all new subscribers choose this plan. All three shares must sum to 100%.</span></span></label><input type="number" id="s-ms" value="10" min="0" max="100" step="1" oninput="upd()" style="width:70px;font-size:12px;padding:5px 8px"></div>
+        </div>
+      </div>
+
+      <!-- Annual tier -->
+      <div class="sub-tier">
+        <div class="sub-tier-hd"><span class="sub-tier-dot" style="background:#F59E0B"></span> Annual</div>
+        <div class="sub-grid">
+          <div class="row"><label style="font-size:12px">Price ($)</label><input type="number" id="s-ap" value="49.99" step="0.01" oninput="upd()" style="width:88px"></div>
+          <div class="row"><label style="font-size:12px">Billing, days</label><input type="number" id="s-ad2" value="365" min="1" oninput="upd()" style="width:88px"></div>
+        </div>
+        <div class="split-bar">
+          <div class="split-row"><label style="font-size:12px">Share of new subs %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">What fraction of all new subscribers choose this plan. All three shares must sum to 100%.</span></span></label><input type="number" id="s-as" value="50" min="0" max="100" step="1" oninput="upd()" style="width:70px;font-size:12px;padding:5px 8px"></div>
+        </div>
+      </div>
+
+      <div id="split-status" class="split-total split-ok" style="margin-bottom:12px">✓ Shares sum to 100%</div>
+
+      <!-- Ad Mediation -->
+      <div style="font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#EC4899;display:inline-block"></span>
+        Ad Mediation
+        <span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Revenue from ad networks (e.g. ironSource, Applovin, Google AdMob) served to active users. Not subject to subscription store fee or refund rate. Enter the blended eCPM or per-user-per-period revenue.</span></span>
+        <label style="margin-left:auto;display:flex;gap:5px;align-items:center;cursor:pointer;font-size:11px;color:var(--color-text-secondary);text-transform:none;letter-spacing:0">
+          <input type="checkbox" id="i-ad-en" onchange="upd()"> enable
+        </label>
+      </div>
+      <div id="ad-block" style="display:none">
+        <div class="mon-src-block">
+          <div class="row"><label style="font-size:12px">Ad rev / active user / period ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Blended revenue per active user per period across all ad formats (banner, interstitial, rewarded). Typical range: $0.05–$2.00 depending on geo and format mix.</span></span></label><input type="number" id="i-ad-v" value="0.30" step="0.01" oninput="upd()" style="width:88px"></div>
+          <div class="row"><label style="font-size:12px">Applied to<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">All active users: ads are shown to everyone including free users. Payers only: ads shown only to subscribers (e.g. rewarded ads).</span></span></label>
+            <div class="tog" style="font-size:12px">
+              <button class="on" id="ad-all" onclick="setAdScope('all')">All active</button>
+              <button id="ad-pay" onclick="setAdScope('pay')">Payers only</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- In-App Purchases -->
+      <div style="font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#8B5CF6;display:inline-block"></span>
+        In-App Purchases
+        <span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">One-time or consumable purchases (coins, chapters, boosts). Revenue is distributed across the cohort lifetime using an LTV curve — enter the expected total IAP revenue per paying user over the full horizon.</span></span>
+        <label style="margin-left:auto;display:flex;gap:5px;align-items:center;cursor:pointer;font-size:11px;color:var(--color-text-secondary);text-transform:none;letter-spacing:0">
+          <input type="checkbox" id="i-iap-en" onchange="upd()"> enable
+        </label>
+      </div>
+      <div id="iap-block" style="display:none">
+        <div class="mon-src-block">
+          <div class="row"><label style="font-size:12px">IAP LTV / payer ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Total expected in-app purchase revenue per paying user over the entire cohort horizon. Spread linearly across active periods. Subject to store fee but not the subscription refund rate.</span></span></label><input type="number" id="i-iap-v" value="5.00" step="0.01" oninput="upd()" style="width:88px"></div>
+        </div>
+      </div>
+
+    </div><!-- /mon-adv -->
+   </div><!-- /monetization sec -->
+
+  </div><!-- right col -->
+ </div><!-- g2 -->
+</div><!-- /setup panel -->
+
+<!-- ═══════════ RESULTS PANEL ═══════════ -->
 <div class="panel" id="p-r">
- <div id="r-empty" class="empty"><i class="ti ti-chart-line" aria-hidden="true" style="font-size:36px;display:block;margin-bottom:8px"></i>Add at least 2 retention points in Setup</div>
+ <div id="r-empty" class="empty">Add at least 2 retention points in Setup</div>
  <div id="r-cont" style="display:none">
   <div class="decision-card"><div class="decision-label">AI-style insight</div><div class="decision-text" id="ai-insight">The model evaluates payback, LTV/CAC and retention decay once results are calculated.</div></div>
+
+  <!-- KPI cards -->
   <div class="mc4">
-   <div class="mc"><div class="ml">LTV / acquired</div><div class="mv" id="r-ltva">—</div><div class="ms" id="r-ltvas">—</div></div>
-   <div class="mc"><div class="ml">LTV / paid user</div><div class="mv" id="r-ltvp">—</div><div class="ms" id="r-ltvps">—</div></div>
-   <div class="mc"><div class="ml">LTV / CAC</div><div class="mv" id="r-lc">—</div><div class="ms">≥ 3 = healthy</div></div>
-   <div class="mc"><div class="ml">Payback</div><div class="mv" id="r-pb">—</div><div class="ms">first profitable period</div></div>
+   <div class="mc">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">LTV / acquired
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Gross revenue generated per acquired user (including all monetization sources) over the full horizon. Numerator = total cohort gross revenue; denominator = cohort size.</span></span>
+     </div>
+     <div class="mv" id="r-ltva">—</div><div class="ms" id="r-ltvas">—</div>
+   </div>
+   <div class="mc">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">LTV / paid user
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Gross revenue per paying user (payer base). Higher than LTV/acquired because non-converting users are excluded from the denominator.</span></span>
+     </div>
+     <div class="mv" id="r-ltvp">—</div><div class="ms" id="r-ltvps">—</div>
+   </div>
+   <div class="mc">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">LTV / CAC
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Key unit-economics ratio. ≥ 3× = healthy and scalable. 1–3× = marginal, optimise before scaling. &lt; 1× = unprofitable, do not scale paid UA.</span></span>
+     </div>
+     <div class="mv" id="r-lc">—</div><div class="ms">≥ 3 = healthy</div>
+   </div>
+   <div class="mc">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">Payback
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">First period when cumulative net revenue (all sources minus fixed costs) equals or exceeds total CAC spend for this cohort. Shorter payback = less working capital tied up.</span></span>
+     </div>
+     <div class="mv" id="r-pb">—</div><div class="ms">first profitable period</div>
+   </div>
   </div>
+
+  <!-- Revenue breakdown KPIs (shown in advanced mode) -->
+  <div class="mc4" id="r-breakdown" style="display:none">
+   <div class="mc" style="min-height:80px">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">Sub revenue
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Cumulative gross subscription revenue across all tiers (Weekly + Monthly + Annual) over the horizon, before store fee / VAT / refunds.</span></span>
+     </div>
+     <div class="mv" id="r-sub-rev" style="font-size:20px">—</div>
+   </div>
+   <div class="mc" style="min-height:80px">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">Ad revenue
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Cumulative ad mediation revenue over the horizon. Enabled in Advanced monetization mode.</span></span>
+     </div>
+     <div class="mv" id="r-ad-rev" style="font-size:20px">—</div>
+   </div>
+   <div class="mc" style="min-height:80px">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">IAP revenue
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Cumulative in-app purchase revenue over the horizon. Enabled in Advanced monetization mode.</span></span>
+     </div>
+     <div class="mv" id="r-iap-rev" style="font-size:20px">—</div>
+   </div>
+   <div class="mc" style="min-height:80px">
+     <div class="ml" style="display:flex;align-items:center;gap:4px">Weighted ARPPU
+       <span class="tip-wrap tip-left"><span class="tip-icon">i</span><span class="tip-box">Effective average revenue per paying user per period, weighted across all subscription tiers by their share. Equivalent to the ARPPU field in simple mode.</span></span>
+     </div>
+     <div class="mv" id="r-warppu" style="font-size:20px">—</div>
+   </div>
+  </div>
+
+  <!-- ROI & ROAS -->
   <div class="roi-bx">
-   <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">ROI and ROAS by horizon</div>
+   <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+     ROI and ROAS by horizon
+     <span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">ROI = (Cumulative Net Revenue − CAC Spend) / CAC Spend. ROAS = 1 + ROI. Calculated at 3-month, 6-month and 12-month marks (or week equivalents). Green = positive ROI, red = still in the red at that horizon.</span></span>
+   </div>
    <div class="roi-g">
     <div><div class="rl">M3</div><div class="rv" id="r3">—</div><div class="rs" id="rs3">—</div></div>
     <div><div class="rl">M6</div><div class="rv" id="r6">—</div><div class="rs" id="rs6">—</div></div>
     <div><div class="rl">M12</div><div class="rv" id="r12">—</div><div class="rs" id="rs12">—</div></div>
    </div>
   </div>
+
+  <!-- Retention chart -->
   <div class="cbx">
-   <div class="ct">Retention curve</div>
+   <div class="ct" style="display:flex;align-items:center;gap:6px">Retention curve
+     <span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Power-law fit R(t) = a · t⁻ᵇ to your observed data points. Blue line = model prediction. Shaded band = ±1σ uncertainty (based on standard error of the fitted exponent b). Amber dots = your observed data. The wider the band, the fewer data points or the worse the fit.</span></span>
+   </div>
    <div class="cs" id="ret-sub">Shaded band = ±1σ confidence · amber dots = observed data</div>
    <div style="position:relative;height:200px"><canvas id="rc" role="img" aria-label="Retention curve with power-law fit and confidence band"></canvas></div>
   </div>
+
+  <!-- Revenue chart -->
   <div class="cbx">
-   <div class="ct">Cumulative net revenue</div>
+   <div class="ct" style="display:flex;align-items:center;gap:6px">Cumulative net revenue
+     <span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Net revenue = subscription revenue × NetF + ad revenue + IAP revenue − fixed costs per period. Cumulated over time. Dashed amber line = total CAC spend for this cohort. When green line crosses amber = payback achieved.</span></span>
+   </div>
    <div class="cs" id="rev-sub">After store fee, VAT, refunds and fixed costs</div>
    <div style="position:relative;height:200px"><canvas id="vc" role="img" aria-label="Cumulative net revenue over time with CAC spend reference line"></canvas></div>
   </div>
  </div>
 </div>
-</div>
+</div><!-- #ltv -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+/* ── state ── */
+let per='week';
+let pts=[{id:1,t:1,r:30},{id:2,t:2,r:15},{id:3,t:4,r:10},{id:4,t:8,r:5},{id:5,t:24,r:3}];
+let nid=6,RC=null,VC=null;
+let advMode=false;
+let adScope='all';
+
+/* ── helpers ── */
+function gi(id){return+document.getElementById(id).value;}
+function gc2(id){return document.getElementById(id).checked;}
+
+function f$(n){
+  if(n==null||isNaN(n))return'—';
+  const s=n<0?'-':'',a=Math.abs(n);
+  if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';
+  if(a>=1e3)return s+'$'+(a/1e3).toFixed(1)+'K';
+  return s+'$'+a.toFixed(2);
+}
+function fp(n){return n==null||isNaN(n)?'—':(n>=0?'+':'')+(n*100).toFixed(1)+'%';}
+function fY(n){const a=Math.abs(n),s=n<0?'-':'';if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';if(a>=1e3)return s+'$'+(a/1e3).toFixed(0)+'K';return s+'$'+a.toFixed(0);}
+
+/* ── power-law fit ── */
 function fitPL(pts){
   const v=pts.filter(p=>p.t>0&&p.r>0&&p.r<100);
   if(v.length<2)return null;
@@ -222,22 +489,8 @@ function pR(t,fit,sig){
   if(!fit||t<=0)return 0;
   return Math.min(1,Math.max(0,Math.exp(fit.logA+(fit.b+sig*fit.seb)*Math.log(t))));
 }
-function f$(n){
-  if(n==null||isNaN(n))return'—';
-  const s=n<0?'-':'',a=Math.abs(n);
-  if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';
-  if(a>=1e3)return s+'$'+(a/1e3).toFixed(1)+'K';
-  return s+'$'+a.toFixed(2);
-}
-function fp(n){return n==null||isNaN(n)?'—':(n>=0?'+':'')+(n*100).toFixed(1)+'%';}
-function fY(n){const a=Math.abs(n),s=n<0?'-':'';if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';if(a>=1e3)return s+'$'+(a/1e3).toFixed(0)+'K';return s+'$'+a.toFixed(0);}
 
-let per='week';
-let pts=[{id:1,t:1,r:30},{id:2,t:2,r:15},{id:3,t:4,r:10},{id:4,t:8,r:5},{id:5,t:24,r:3}];
-let nid=6,RC=null,VC=null;
-
-function gi(id){return+document.getElementById(id).value;}
-
+/* ── UI controls ── */
 function rPts(){
   const pL=per==='week'?'W':'M';
   document.getElementById('ptcol').textContent='t ('+pL+')';
@@ -268,14 +521,83 @@ function sw(t){
   if(t==='r')upd();
 }
 
+function toggleMonAdv(){
+  advMode=!advMode;
+  document.getElementById('mon-adv').classList.toggle('open',advMode);
+  document.getElementById('mon-simple').style.display=advMode?'none':'block';
+  const btn=document.getElementById('mon-adv-btn');
+  btn.textContent=advMode?'▲ Simple':'▼ Advanced';
+  btn.classList.toggle('active',advMode);
+  upd();
+}
+
+function setAdScope(s){
+  adScope=s;
+  document.getElementById('ad-all').classList.toggle('on',s==='all');
+  document.getElementById('ad-pay').classList.toggle('on',s==='pay');
+  upd();
+}
+
+/* ── update split validation ── */
+function updateSplitStatus(){
+  const ws=gi('s-ws'),ms=gi('s-ms'),as=gi('s-as');
+  const total=ws+ms+as;
+  const el=document.getElementById('split-status');
+  if(Math.abs(total-100)<0.01){
+    el.textContent='✓ Shares sum to 100%';
+    el.className='split-total split-ok';
+  } else {
+    el.textContent='⚠ Shares sum to '+total.toFixed(0)+'% (need 100%)';
+    el.className='split-total split-err';
+  }
+}
+
+/* ── ARPPU from tiers (per period in chosen period granularity) ── */
+function calcTierARPPU(){
+  const wp=gi('s-wp'),wd=gi('s-wd'),ws=gi('s-ws')/100;
+  const mp=gi('s-mp'),md=gi('s-md'),ms2=gi('s-ms')/100;
+  const ap=gi('s-ap'),ad2=gi('s-ad2'),as2=gi('s-as')/100;
+  const periodDays=per==='week'?7:30.44;
+  // Revenue per payer per period = price * (periodDays / billingDays) * share
+  const wRev=wp*(periodDays/wd)*ws;
+  const mRev=mp*(periodDays/md)*ms2;
+  const aRev=ap*(periodDays/ad2)*as2;
+  const gross=wRev+mRev+aRev;
+  // Also track sub-totals for breakdown
+  return{gross, weekly:wRev, monthly:mRev, annual:aRev};
+}
+
+/* ── main update ── */
 function upd(){
-  const co=gi('i-co'),ca=gi('i-ca'),h=gi('i-h'),fn=document.getElementById('i-fn').checked;
-  const tr=gi('i-tr'),pd=gi('i-pd'),ar=gi('i-ar'),ad=gi('i-ad');
+  updateSplitStatus();
+
+  const co=gi('i-co'),ca=gi('i-ca'),h=gi('i-h'),fn=gc2('i-fn');
+  const tr=gi('i-tr'),pd=gi('i-pd');
   const fe=gi('i-fe'),vt=gi('i-vt'),rf=gi('i-rf'),fx=gi('i-fx');
   const pbase=fn?co*(tr/100)*(pd/100):co;
   const pL=per==='week'?'W':'M';
   const pFix=fx/(per==='week'?4.333:1);
   const netF=(1-fe/100)*(1-vt/100)*(1-rf/100);
+
+  /* Revenue params */
+  let ar,adRevPerPeriod,iapLTV;
+  let subBreakWeekly=0,subBreakMonthly=0,subBreakAnnual=0;
+
+  if(advMode){
+    const tiers=calcTierARPPU();
+    ar=tiers.gross;
+    subBreakWeekly=tiers.weekly;subBreakMonthly=tiers.monthly;subBreakAnnual=tiers.annual;
+    adRevPerPeriod=gc2('i-ad-en')?gi('i-ad-v'):0;
+    iapLTV=gc2('i-iap-en')?gi('i-iap-v'):0;
+    // show / hide blocks
+    document.getElementById('ad-block').style.display=gc2('i-ad-en')?'block':'none';
+    document.getElementById('iap-block').style.display=gc2('i-iap-en')?'block':'none';
+  } else {
+    ar=gi('i-ar');
+    adRevPerPeriod=gi('i-ad');
+    iapLTV=0;
+  }
+
   const maxT=pts.length>0?Math.max(...pts.map(p=>p.t)):1;
   const overX=h>3*maxT;
   const fit=fitPL(pts);
@@ -287,7 +609,7 @@ function upd(){
   const fi=document.getElementById('fit-info');
   if(fit){
     const cls=fit.r2>=0.95?'bg':fit.r2>=0.75?'by':'br';
-    fi.innerHTML='<span class="bdg '+cls+'">R² '+(fit.r2*100).toFixed(0)+'%</span>'+(overX?'<span class="bdg by"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:13px;margin-right:3px"></i>'+Math.round(h/maxT)+'× beyond data</span>':'');
+    fi.innerHTML='<span class="bdg '+cls+'">R² '+(fit.r2*100).toFixed(0)+'%</span>'+(overX?'<span class="bdg by">'+Math.round(h/maxT)+'× beyond data</span>':'');
     document.getElementById('fml').style.display='block';
     document.getElementById('fa').textContent=fit.a.toFixed(4);
     document.getElementById('fb').textContent=Math.abs(fit.b).toFixed(4);
@@ -304,14 +626,21 @@ function upd(){
   document.getElementById('r-empty').style.display='none';
   document.getElementById('r-cont').style.display='block';
 
+  /* ── per-period simulation ── */
   const spend=co*ca;
-  const rows=[];let cumG=0,cumN=0,payback=null;
+  const rows=[];let cumG=0,cumN=0,cumAd=0,cumIap=0,cumSub=0,payback=null;
+  const iapPerPeriod=pbase>0?(iapLTV*pbase)/h/pbase:0; // IAP spread per payer per period
+  
   for(let t=1;t<=h;t++){
     const r=pR(t,fit,0)*100,rHi=pR(t,fit,1)*100,rLo=pR(t,fit,-1)*100;
     const act=pbase*r/100;
-    const gross=act*ar+act*ad;
-    const net=act*ar*netF+act*ad-pFix;
-    cumG+=gross;cumN+=net;
+    const adUsers=adScope==='all'?act:act; // act for all-active, or pbase* fraction for payers
+    const subGross=act*ar;
+    const adGross=adRevPerPeriod*(adScope==='pay'?Math.min(act,pbase):act);
+    const iapGross=iapLTV>0?act*iapPerPeriod:0;
+    const gross=subGross+adGross+iapGross;
+    const net=subGross*netF+adGross+iapGross*netF-pFix;
+    cumG+=gross;cumN+=net;cumAd+=adGross;cumIap+=iapGross;cumSub+=subGross;
     if(!payback&&cumN>=spend)payback=t;
     const actual=pts.find(p=>p.t===t)?.r??null;
     rows.push({t,r,rHi,rLo,actual,cumN,cumG});
@@ -322,6 +651,7 @@ function upd(){
   const m3=per==='week'?13:3,m6=per==='week'?26:6,m12=per==='week'?52:12;
   const r3=roi(Math.min(m3,h)),r6=roi(Math.min(m6,h)),r12=roi(Math.min(m12,h));
 
+  /* ── KPI display ── */
   document.getElementById('r-ltva').textContent=f$(ltva);
   document.getElementById('r-ltvas').textContent=h+pL+' horizon';
   document.getElementById('r-ltvp').textContent=f$(ltvp);
@@ -339,11 +669,32 @@ function upd(){
     document.getElementById('rs'+n).textContent='ROAS '+(v!=null?((1+(v||0)).toFixed(2))+'×':'—');
   });
 
+  /* ── Advanced breakdown row ── */
+  const bkd=document.getElementById('r-breakdown');
+  bkd.style.display=advMode?'grid':'none';
+  if(advMode){
+    document.getElementById('r-sub-rev').textContent=f$(cumSub);
+    document.getElementById('r-ad-rev').textContent=gc2('i-ad-en')?f$(cumAd):'—';
+    document.getElementById('r-iap-rev').textContent=gc2('i-iap-en')?f$(cumIap):'—';
+    document.getElementById('r-warppu').textContent=f$(ar);
+  }
+
+  /* ── AI insight ── */
+  const lcTxt=lce.textContent;
+  const pbTxt=pbe.textContent;
+  const ai=document.getElementById('ai-insight');
+  if(ai&&lc!=null){
+    if(lc>=3) ai.textContent=`The current model looks scalable: LTV/CAC is ${lcTxt}, with projected payback at ${pbTxt}. Validate with more cohort points before increasing budgets aggressively.`;
+    else if(lc>=1) ai.textContent=`The model is marginal: LTV/CAC is ${lcTxt} and payback is ${pbTxt}. Improve W4/W8 retention, reduce CAC, or increase ARPPU before scaling.`;
+    else ai.textContent=`The model is currently unprofitable: LTV/CAC is ${lcTxt}. Scaling paid acquisition would likely destroy margin unless CAC drops or retention/revenue improves.`;
+  }
+
+  /* ── Charts ── */
   const step=Math.max(1,Math.ceil(h/52));
   const cd=rows.filter((_,i)=>i%step===0||i===rows.length-1);
   const labels=cd.map(r=>pL+r.t);
   const dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  const gc=dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
+  const gc3=dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
   const ac=dk?'#64748b':'#94a3b8';
   const tb=dk?'#1e293b':'#fff';const tbd=dk?'#334155':'#e2e8f0';
 
@@ -372,8 +723,8 @@ function upd(){
         }
       },
       scales:{
-        x:{grid:{color:gc},ticks:{color:ac,font:{size:11}},border:{display:false}},
-        y:{grid:{color:gc},ticks:{color:ac,font:{size:11},callback:v=>v+'%'},border:{display:false},min:0}
+        x:{grid:{color:gc3},ticks:{color:ac,font:{size:11}},border:{display:false}},
+        y:{grid:{color:gc3},ticks:{color:ac,font:{size:11},callback:v=>v+'%'},border:{display:false},min:0}
       }
     }
   });
@@ -399,8 +750,8 @@ function upd(){
         }
       },
       scales:{
-        x:{grid:{color:gc},ticks:{color:ac,font:{size:11}},border:{display:false}},
-        y:{grid:{color:gc},ticks:{color:ac,font:{size:11},callback:v=>fY(v)},border:{display:false}}
+        x:{grid:{color:gc3},ticks:{color:ac,font:{size:11}},border:{display:false}},
+        y:{grid:{color:gc3},ticks:{color:ac,font:{size:11},callback:v=>fY(v)},border:{display:false}}
       }
     }
   });
@@ -412,25 +763,5 @@ rPts();upd();
   </section>
   <div class="footer-note">Static HTML calculator · ready for GitHub Pages</div>
 </main>
-<script>
-(function(){
- const oldUpd = window.upd;
- if (typeof oldUpd === 'function') {
-   window.upd = function(){
-     oldUpd();
-     const lcTxt=(document.getElementById('r-lc')||{}).textContent||'';
-     const pbTxt=(document.getElementById('r-pb')||{}).textContent||'—';
-     const ai=document.getElementById('ai-insight');
-     const lc=parseFloat(lcTxt.replace('×',''));
-     if(ai && !Number.isNaN(lc)){
-       if(lc>=3) ai.textContent=`The current model looks scalable: LTV/CAC is ${lcTxt}, with projected payback at ${pbTxt}. Validate with more cohort points before increasing budgets aggressively.`;
-       else if(lc>=1) ai.textContent=`The model is marginal: LTV/CAC is ${lcTxt} and payback is ${pbTxt}. Improve W4/W8 retention, reduce CAC, or increase ARPPU before scaling.`;
-       else ai.textContent=`The model is currently unprofitable: LTV/CAC is ${lcTxt}. Scaling paid acquisition would likely destroy margin unless CAC drops or retention/revenue improves.`;
-     }
-   };
-   window.upd();
- }
-})();
-</script>
 </body>
 </html>
