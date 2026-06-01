@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LTV Calculator — Методология / Methodology</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --blue: #2563EB;
@@ -14,15 +14,15 @@
   --green: #16A34A;
   --amber: #B45309;
   --red: #DC2626;
-  --ink: #0C1220;
-  --slate: #475569;
-  --mist: #94A3B8;
+  --ink: #0F172A;
+  --slate: #1E293B;
+  --mist: #64748B;
   --rule: #E2E8F0;
   --paper: #F8FAFC;
   --white: #FFFFFF;
   --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
-  --serif: 'Source Serif 4', Georgia, serif;
-  --display: 'Playfair Display', Georgia, serif;
+  --serif: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --display: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -156,7 +156,7 @@ body {
   color: var(--slate);
   font-size: 17px;
   line-height: 1.7;
-  font-weight: 300;
+  font-weight: 400;
 }
 .version-row {
   margin-top: 28px;
@@ -259,7 +259,7 @@ body {
   margin: 28px 0 10px;
 }
 
-.prose p { color: var(--slate); margin-bottom: 14px; font-weight: 300; }
+.prose p { color: var(--slate); margin-bottom: 14px; font-weight: 400; }
 .prose p:last-child { margin-bottom: 0; }
 
 /* ─── FORMULA BOX ─── */
@@ -285,7 +285,7 @@ body {
   font-size: 10px;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #64748B;
+  color: #CBD5E1;
   margin-bottom: 12px;
 }
 .formula {
@@ -303,7 +303,7 @@ body {
 .formula-note {
   margin-top: 12px;
   font-size: 12px;
-  color: #64748B;
+  color: #CBD5E1;
   font-family: var(--mono);
   line-height: 1.7;
   position: relative;
@@ -334,7 +334,7 @@ body {
 .info-card-value {
   font-size: 14px;
   color: var(--ink);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.55;
 }
 .info-card-value code {
@@ -367,7 +367,7 @@ body {
   padding: 11px 14px;
   border-bottom: 1px solid var(--paper);
   color: var(--slate);
-  font-weight: 300;
+  font-weight: 400;
   vertical-align: top;
 }
 .param-table tr:last-child td { border-bottom: none; }
@@ -397,7 +397,7 @@ body {
   border-radius: 14px;
   margin: 20px 0;
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
 }
 .callout.blue { background: rgba(37,99,235,0.07); border-left: 3px solid var(--blue); }
 .callout.green { background: rgba(22,163,74,0.07); border-left: 3px solid var(--green); }
@@ -428,7 +428,7 @@ body {
   margin-top: 2px;
   box-shadow: 0 4px 10px rgba(37,99,235,0.25);
 }
-.step-body { font-size: 14px; color: var(--slate); font-weight: 300; line-height: 1.65; }
+.step-body { font-size: 14px; color: var(--slate); font-weight: 400; line-height: 1.65; }
 .step-body strong { color: var(--ink); font-weight: 600; }
 .step-body code {
   font-family: var(--mono);
@@ -461,10 +461,11 @@ body {
 .tb-green { background: rgba(22,163,74,0.1); color: var(--green); }
 .tb-amber { background: rgba(180,83,9,0.1); color: var(--amber); }
 .tb-red { background: rgba(220,38,38,0.1); color: var(--red); }
-.threshold-text { font-size: 14px; color: var(--slate); font-weight: 300; }
+.threshold-text { font-size: 14px; color: var(--slate); font-weight: 400; }
 
 /* ─── DIVIDER ─── */
 .lang-divider {
+  display: none !important;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -506,6 +507,55 @@ body.show-en .lang-ru { display: none; }
   .info-grid { grid-template-columns: 1fr; }
   .threshold-row { grid-template-columns: 80px 1fr; }
 }
+
+/* ─── READABILITY & LANGUAGE FIX OVERRIDES ─── */
+body {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+.hero h1,
+.section h2,
+.section h3 {
+  font-family: var(--display);
+}
+.prose p,
+.callout-body,
+.step-body,
+.threshold-text,
+.info-card-value,
+.param-table td,
+.hero-sub {
+  color: #1E293B;
+  font-family: var(--serif);
+  font-weight: 500;
+}
+.prose p {
+  font-size: 16px;
+  line-height: 1.78;
+}
+.callout-body,
+.step-body {
+  font-size: 15px;
+  line-height: 1.72;
+}
+.formula-note {
+  color: #CBD5E1;
+}
+.formula-label {
+  color: #93C5FD;
+}
+.brand-mini {
+  align-items: center;
+}
+.brand-mini span,
+.calc-link {
+  top: 0;
+  transform: translateY(0);
+}
+.lang-divider {
+  display: none !important;
+}
+
 </style>
 </head>
 <body class="show-ru">
@@ -861,6 +911,10 @@ body.show-en .lang-ru { display: none; }
     <div class="callout-body"><strong>Ограничения модели.</strong> Степенной закон — это аппроксимация. Реальное удержание может иметь «ступеньки» (праздники, ребрендинг, сезонность). Рекомендуется использовать минимум 3–5 точек данных, охватывающих хотя бы 30–50% прогнозного горизонта. Чем больше точек касания — тем точнее модель: МНК учитывает все наблюдения одновременно, и каждая дополнительная точка снижает стандартную ошибку SE(b) и сужает полосу неопределённости. Точки можно добавлять в любой момент во вкладке «Setup» — кнопка «Add».</div>
   </div>
 
+</div>
+
+</div><!-- /lang-ru -->
+
 <!-- ═══════════════ DIVIDER ═══════════════ -->
 <div class="lang-divider" id="en-start">English version below</div>
 
@@ -1066,7 +1120,7 @@ body.show-en .lang-ru { display: none; }
     <p><strong>ARPPU (Average Revenue Per Paying User)</strong> is the average revenue from one paying user per period (week or month). This is the subscription price before any commissions or refunds are deducted.</p>
     <p><strong>Gross revenue</strong> is the total amount before any commissions, taxes, or refunds are deducted.</p>
     <p><strong>Net revenue</strong> is the amount remaining after deducting the app store commission, VAT, refunds, and fixed costs.</p>
-    <p><strong>NetF (Net Factor)</strong> is a multiplier combining all вычеты into a single number. For example, with a 17% store fee, 10% VAT, and 20% refunds: NetF = 0.83 × 0.90 × 0.80 ≈ 0.597.</p>
+    <p><strong>NetF (Net Factor)</strong> is a multiplier combining all deductions into a single coefficient. For example, with a 17% store fee, 10% VAT, and 20% refunds: NetF = 0.83 × 0.90 × 0.80 ≈ 0.597.</p>
     <p>At each period t, the number of active users is calculated, then all deduction factors and fixed costs are subtracted from gross revenue.</p>
   </div>
 
@@ -1206,6 +1260,8 @@ body.show-en .lang-ru { display: none; }
     <div class="callout-body"><strong>Model limitations.</strong> The power law is an approximation. Real retention may exhibit step changes (seasonal effects, product changes, marketing campaigns). It is recommended to use at least 3–5 data points spanning at least 30–50% of the forecast horizon before drawing conclusions. The more data points you add, the more accurate the model becomes: OLS fits all observations simultaneously, and each additional point reduces the standard error SE(b), narrowing the uncertainty band. Points can be added at any time in the Setup tab using the "Add" button.</div>
   </div>
 
+</div><!-- /lang-en -->
+
 <div class="footer">
   LTV Calculator — Methodology · Static HTML · Power-law retention model
 </div>
@@ -1214,10 +1270,10 @@ body.show-en .lang-ru { display: none; }
 
 <script>
 function setLang(lang) {
-  document.body.className = 'show-' + lang;
+  document.body.classList.remove('show-ru', 'show-en');
+  document.body.classList.add('show-' + lang);
   document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  // scroll to top of content
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
