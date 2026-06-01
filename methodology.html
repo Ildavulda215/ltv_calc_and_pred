@@ -6,136 +6,507 @@
 <title>LTV Calculator — Методология / Methodology</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet">
-
 <style>
-:root{
-  --blue:#2563EB;--blue-soft:rgba(37,99,235,.10);--green:#16A34A;--green-soft:rgba(22,163,74,.10);
-  --amber:#F59E0B;--amber-soft:rgba(245,158,11,.12);--red:#DC2626;--red-soft:rgba(220,38,38,.10);
-  --ink:#0F172A;--slate:#475569;--mist:#94A3B8;--rule:#E2E8F0;--paper:#F8FAFC;--white:#fff;
-  --mono:"IBM Plex Mono","Roboto Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --sans:Inter,"IBM Plex Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --shadow:0 18px 48px rgba(15,23,42,.08);--shadow-soft:0 8px 24px rgba(15,23,42,.05);
-  --radius-xl:28px;--radius-lg:20px;--radius-md:14px;
+:root {
+  --blue: #2563EB;
+  --blue-light: rgba(37,99,235,0.10);
+  --blue-mid: rgba(37,99,235,0.18);
+  --green: #16A34A;
+  --amber: #B45309;
+  --red: #DC2626;
+  --ink: #0C1220;
+  --slate: #475569;
+  --mist: #94A3B8;
+  --rule: #E2E8F0;
+  --paper: #F8FAFC;
+  --white: #FFFFFF;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --display: 'Playfair Display', Georgia, serif;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:var(--sans);font-size:16px;line-height:1.72;color:var(--ink);min-height:100vh;
-  background:radial-gradient(circle at 8% 0%,rgba(37,99,235,.10),transparent 30%),
-             radial-gradient(circle at 94% 8%,rgba(22,163,74,.08),transparent 25%),
-             linear-gradient(180deg,#fff 0%,var(--paper) 38%,#F8FAFC 100%);
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink);
+  background: #FAFBFC;
+  background-image:
+    radial-gradient(circle at 5% 0%, rgba(37,99,235,0.06) 0%, transparent 35%),
+    radial-gradient(circle at 95% 10%, rgba(22,163,74,0.05) 0%, transparent 28%),
+    radial-gradient(circle at 50% 100%, rgba(37,99,235,0.04) 0%, transparent 40%);
+  min-height: 100vh;
 }
-.lang-bar{
-  position:sticky;top:16px;z-index:50;max-width:1180px;margin:16px auto 0;padding:14px 18px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid rgba(226,232,240,.85);
-  border-radius:999px;background:rgba(255,255,255,.76);box-shadow:var(--shadow-soft);backdrop-filter:blur(14px);
+
+/* ─── LANG SWITCHER ─── */
+.lang-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 32px;
+  gap: 12px;
 }
-.brand-mini{display:flex;align-items:center;gap:10px;font:760 14px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
-.brand-mark{
-  width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,var(--blue),#0F766E);
-  display:grid;place-items:center;color:#fff;font:800 13px/1 var(--sans);box-shadow:0 12px 22px rgba(37,99,235,.24)
+.brand-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--slate);
+  letter-spacing: -.01em;
 }
-.brand-mini::after{content:"Calculator methodology";color:var(--slate);font-weight:700}
-.lang-toggle{display:flex;gap:4px;padding:4px;border-radius:999px;background:#F1F5F9;border:1px solid var(--rule)}
-.lang-btn{
-  min-height:28px;padding:0 11px;border:0;border-radius:999px;background:transparent;color:var(--slate);
-  font:700 12px/1 var(--mono);cursor:pointer;transition:all .16s ease-out
+.brand-mini span {
+  position: relative;
+  top: 1px;
 }
-.lang-btn.active{background:#fff;color:var(--blue);box-shadow:0 5px 12px rgba(15,23,42,.06)}
-.lang-btn:hover{color:var(--blue)}
-.page{max-width:1180px;margin:0 auto;padding:28px 28px 76px}
-.hero{
-  display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);gap:22px;align-items:stretch;
-  padding:0;border:0;margin:0 0 28px
+.brand-mark {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563EB, #0F766E);
+  display: grid; place-items: center;
+  color: white; font-size: 11px; font-weight: 700;
 }
-.hero::after{
-  content:"Model stack\A Retention: power-law\A Fit: OLS log-log\A Uncertainty: ±1σ\A Outputs: LTV / CAC / ROAS";
-  white-space:pre-line;background:rgba(255,255,255,.9);border:1px solid rgba(226,232,240,.9);border-radius:var(--radius-xl);
-  box-shadow:var(--shadow);padding:34px 28px;color:var(--slate);font:700 15px/2 var(--mono)
+.lang-toggle {
+  display: flex;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
 }
-.hero>*:not(.version-row){position:relative;z-index:1}
-.hero{
-  background:rgba(255,255,255,.9);border:1px solid rgba(226,232,240,.9);border-radius:var(--radius-xl);
-  box-shadow:var(--shadow);padding:44px;overflow:hidden;position:relative
+.lang-btn {
+  padding: 5px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  background: transparent;
+  color: var(--mist);
+  transition: all .2s;
 }
-.hero::before{
-  content:"";position:absolute;right:270px;top:-120px;width:320px;height:320px;border-radius:50%;
-  background:radial-gradient(circle,rgba(37,99,235,.14),transparent 66%)
+.lang-btn.active {
+  background: var(--white);
+  color: var(--blue);
+  box-shadow: 0 3px 10px rgba(15,23,42,0.10);
 }
-.eyebrow{
-  display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;padding:8px 12px;border-radius:999px;
-  background:var(--blue-soft);color:var(--blue);font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:780
+
+.calc-link {
+  margin-left: 10px;
+  color: var(--blue);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
 }
-.hero h1{
-  max-width:760px;font-size:clamp(42px,5vw,72px);line-height:.96;letter-spacing:-.065em;font-weight:820;
-  color:var(--ink);margin-bottom:20px;font-family:var(--sans)
+.calc-link:hover { text-decoration: underline; }
+
+/* ─── PAGE ─── */
+.page { max-width: 860px; margin: 0 auto; padding: 0 28px 80px; }
+
+/* ─── HERO ─── */
+.hero {
+  padding: 72px 0 56px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 64px;
 }
-.hero h1 em{font-style:normal;color:var(--blue)}
-.hero-sub{max-width:680px;color:var(--slate);font-size:18px;line-height:1.65;font-weight:400}
-.version-row{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap}
-.tag{
-  display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);
-  background:#fff;color:var(--slate);font:700 12px/1 var(--sans)
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  padding: 6px 12px;
+  background: var(--blue-light);
+  border-radius: 999px;
 }
-.toc,.info-card,.param-wrap,.step,.threshold-row,.callout{
-  background:#fff;border:1px solid var(--rule);box-shadow:var(--shadow-soft)
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(38px, 5.5vw, 64px);
+  font-weight: 900;
+  line-height: 1.03;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  margin-bottom: 18px;
 }
-.toc{border-radius:var(--radius-lg);padding:22px;margin:0 0 42px}
-.toc-label,.info-card-label{
-  color:var(--mist);text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:780;margin-bottom:14px;font-family:var(--sans)
+.hero h1 em {
+  font-style: italic;
+  color: var(--blue);
 }
-.toc ol{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 24px;counter-reset:toc}
-.toc li{counter-increment:toc}
-.toc a{display:flex;gap:8px;align-items:baseline;color:var(--slate);text-decoration:none;font-size:14px;font-weight:650;padding:4px 0}
-.toc a::before{content:counter(toc,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--blue);opacity:.75}
-.toc a:hover{color:var(--blue)}
-.section{margin:58px 0 0;padding-top:36px;border-top:1px solid var(--rule)}
-.section-header{display:flex;gap:18px;align-items:flex-start;margin-bottom:22px;padding:0;border:0}
-.section-number{
-  width:34px;height:34px;display:grid;place-items:center;border-radius:999px;background:var(--blue-soft);
-  color:var(--blue);font-family:var(--mono);font-size:12px;font-weight:800;flex-shrink:0;margin-top:2px
+.hero-sub {
+  max-width: 620px;
+  color: var(--slate);
+  font-size: 17px;
+  line-height: 1.7;
+  font-weight: 300;
 }
-.section h2{font:820 clamp(26px,3vw,38px)/1.12 var(--sans);letter-spacing:-.045em;color:var(--ink)}
-.section h3{font:780 20px/1.25 var(--sans);letter-spacing:-.025em;color:var(--ink);margin:30px 0 12px}
-.prose p,.step-body,.threshold-text,.callout-body{color:var(--slate);font-size:16px;line-height:1.72;font-weight:400}
-.prose p{margin-bottom:15px}
-.prose em{font-style:normal;color:var(--blue);font-weight:700}
-.formula-box{
-  background:linear-gradient(135deg,#0F172A,#172554);color:#E2E8F0;border-radius:var(--radius-lg);
-  padding:24px;margin:24px 0;position:relative;overflow:hidden;box-shadow:var(--shadow-soft)
+.version-row {
+  margin-top: 28px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
-.formula-box::before{
-  content:"";position:absolute;right:-70px;top:-80px;width:220px;height:220px;border-radius:50%;
-  background:radial-gradient(circle,rgba(59,130,246,.34),transparent 62%)
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--slate);
+  background: var(--white);
 }
-.formula-label{font-family:var(--mono);color:#93C5FD;text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:800;margin-bottom:12px;position:relative}
-.formula{color:#F8FAFC;font-family:var(--mono);font-size:17px;line-height:1.72;position:relative}
-.formula .hi{color:#93C5FD}.formula .hi-g{color:#86EFAC}.formula .hi-a{color:#FCD34D}
-.formula-note{margin-top:14px;color:#94A3B8;font-family:var(--mono);font-size:12px;line-height:1.7;position:relative}
-.callout{display:flex;gap:14px;padding:16px 18px;border-radius:var(--radius-md);margin:20px 0}
-.callout.blue{border-left:4px solid var(--blue)}.callout.green{border-left:4px solid var(--green)}.callout.amber{border-left:4px solid var(--amber)}
-.callout-icon{font-size:18px;flex-shrink:0;line-height:1.5}.callout-body strong,.step-body strong{color:var(--ink);font-weight:780}
-.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}
-.info-card{border-radius:var(--radius-md);padding:17px}.info-card-value{color:var(--slate);font-size:15px;line-height:1.65}
-code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);padding:2px 6px;border-radius:6px;font-size:.92em}
-.steps{display:grid;gap:14px;margin:22px 0}.step{display:flex;gap:15px;align-items:flex-start;border-radius:var(--radius-md);padding:16px}
-.step-num{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;color:#fff;background:var(--blue);font-family:var(--mono);font-size:12px;font-weight:800;flex-shrink:0}
-.param-wrap{border-radius:var(--radius-lg);overflow:hidden;margin:22px 0}.param-table{width:100%;border-collapse:collapse;font-size:14px}
-.param-table th{text-align:left;padding:13px 15px;color:var(--mist);text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:780;border-bottom:1px solid var(--rule);background:#F8FAFC}
-.param-table td{padding:13px 15px;border-bottom:1px solid #EEF2F7;color:var(--slate);vertical-align:top}
-.param-table tr:last-child td{border-bottom:0}.param-table td:first-child{color:var(--blue);font-family:var(--mono);font-weight:760;white-space:nowrap}
-.threshold-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center;margin-bottom:12px;border-radius:var(--radius-md);padding:14px}
-.threshold-badge{display:inline-flex;justify-content:center;align-items:center;min-height:34px;border-radius:999px;font-family:var(--mono);font-size:12px;font-weight:800;padding:0 12px;white-space:nowrap}
-.tb-green{background:var(--green-soft);color:var(--green)}.tb-amber{background:var(--amber-soft);color:#B45309}.tb-red{background:var(--red-soft);color:var(--red)}
-.lang-divider{display:none}.footer{max-width:980px;margin:34px auto 0;color:var(--mist);font-family:var(--mono);font-size:12px;text-align:center;border-top:1px solid var(--rule);padding-top:24px}
-.lang-ru,.lang-en{display:block}body.show-ru .lang-en{display:none}body.show-en .lang-ru{display:none}
-@media(max-width:820px){
-  .page{padding:18px 16px 56px}.lang-bar{align-items:flex-start;border-radius:22px;flex-direction:column;margin:12px 12px 0}
-  .hero{grid-template-columns:1fr;padding:28px;border-radius:24px}.hero::after{font-size:13px}
-  .toc ol,.info-grid{grid-template-columns:1fr}.threshold-row{grid-template-columns:1fr}.param-wrap{overflow-x:auto}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-bottom: 56px;
+  box-shadow: 0 8px 28px rgba(15,23,42,0.05);
+}
+.toc-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 14px;
+}
+.toc ol {
+  list-style: none;
+  counter-reset: toc;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 32px;
+}
+.toc li { counter-increment: toc; }
+.toc a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--slate);
+  text-decoration: none;
+  padding: 5px 0;
+  border-bottom: 1px dashed transparent;
+  transition: color .15s, border-color .15s;
+}
+.toc a::before {
+  content: counter(toc, decimal-leading-zero);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--blue);
+  opacity: .7;
+  flex-shrink: 0;
+}
+.toc a:hover { color: var(--blue); border-bottom-color: var(--blue-mid); }
+
+/* ─── SECTION ─── */
+.section { margin-bottom: 72px; }
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+.section-number {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--blue);
+  margin-top: 6px;
+  flex-shrink: 0;
+  width: 28px;
+}
+.section h2 {
+  font-family: var(--display);
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.03em;
+  color: var(--ink);
+}
+.section h3 {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin: 28px 0 10px;
+}
+
+.prose p { color: var(--slate); margin-bottom: 14px; font-weight: 300; }
+.prose p:last-child { margin-bottom: 0; }
+
+/* ─── FORMULA BOX ─── */
+.formula-box {
+  background: var(--ink);
+  color: #E2E8F0;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+.formula-box::before {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37,99,235,0.22), transparent 65%);
+}
+.formula-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #64748B;
+  margin-bottom: 12px;
+}
+.formula {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: #F8FAFC;
+  letter-spacing: .01em;
+  line-height: 1.6;
+  position: relative;
+}
+.formula .hi { color: #93C5FD; }
+.formula .hi-g { color: #86EFAC; }
+.formula .hi-a { color: #FCD34D; }
+.formula-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #64748B;
+  font-family: var(--mono);
+  line-height: 1.7;
+  position: relative;
+}
+
+/* ─── INFO GRID ─── */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.info-card {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
+}
+.info-card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 6px;
+}
+.info-card-value {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 300;
+  line-height: 1.55;
+}
+.info-card-value code {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--blue);
+  background: var(--blue-light);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ─── PARAM TABLE ─── */
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+}
+.param-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mist);
+  border-bottom: 1px solid var(--rule);
+}
+.param-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--paper);
+  color: var(--slate);
+  font-weight: 300;
+  vertical-align: top;
+}
+.param-table tr:last-child td { border-bottom: none; }
+.param-table td:first-child {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--blue);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.param-table tr { background: var(--white); }
+.param-table tr:nth-child(even) { background: var(--paper); }
+.param-wrap {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
+  margin: 20px 0;
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  margin: 20px 0;
+  font-size: 14px;
+  font-weight: 300;
+}
+.callout.blue { background: rgba(37,99,235,0.07); border-left: 3px solid var(--blue); }
+.callout.green { background: rgba(22,163,74,0.07); border-left: 3px solid var(--green); }
+.callout.amber { background: rgba(180,83,9,0.07); border-left: 3px solid var(--amber); }
+.callout-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+.callout-body { color: var(--slate); line-height: 1.65; }
+.callout-body strong { color: var(--ink); font-weight: 600; }
+
+/* ─── STEPS ─── */
+.steps { margin: 20px 0; }
+.step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+  align-items: flex-start;
+}
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: white;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  box-shadow: 0 4px 10px rgba(37,99,235,0.25);
+}
+.step-body { font-size: 14px; color: var(--slate); font-weight: 300; line-height: 1.65; }
+.step-body strong { color: var(--ink); font-weight: 600; }
+.step-body code {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--blue);
+  background: var(--blue-light);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ─── DECISION THRESHOLDS ─── */
+.threshold-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.threshold-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 14px;
+}
+.tb-green { background: rgba(22,163,74,0.1); color: var(--green); }
+.tb-amber { background: rgba(180,83,9,0.1); color: var(--amber); }
+.tb-red { background: rgba(220,38,38,0.1); color: var(--red); }
+.threshold-text { font-size: 14px; color: var(--slate); font-weight: 300; }
+
+/* ─── DIVIDER ─── */
+.lang-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 80px 0 72px;
+  color: var(--mist);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.lang-divider::before, .lang-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--rule));
+}
+.lang-divider::after { background: linear-gradient(to left, transparent, var(--rule)); }
+
+/* ─── FOOTER ─── */
+.footer {
+  text-align: center;
+  padding: 40px 0 20px;
+  color: var(--mist);
+  font-family: var(--mono);
+  font-size: 11px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ─── LANG HIDE ─── */
+.lang-ru, .lang-en { display: block; }
+body.show-ru .lang-en { display: none; }
+body.show-en .lang-ru { display: none; }
+
+@media (max-width: 680px) {
+  .page { padding: 0 16px 60px; }
+  .hero { padding: 48px 0 40px; }
+  .lang-bar { padding: 10px 16px; }
+  .toc ol { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .threshold-row { grid-template-columns: 80px 1fr; }
 }
 </style>
-
 </head>
 <body class="show-ru">
 
@@ -143,7 +514,7 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
 <div class="lang-bar">
   <div class="brand-mini">
     <div class="brand-mark">LTV</div>
-    <span>Methodology</span><a href="index.html" style="margin-left:12px;color:#2563EB;text-decoration:none;font-weight:700">← Calculator</a>
+    <span>Methodology</span><a class="calc-link" href="index.html">← Calculator</a>
   </div>
   <div class="lang-toggle">
     <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
@@ -158,7 +529,7 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
 
 <div class="hero">
   <div class="eyebrow">📐 Методология</div>
-  <h1>LTV Calculator<br><em>и предсказание</em></h1>
+  <h1>LTV Calculator<br><em>и прогноз</em></h1>
   <p class="hero-sub">Полное описание математической модели, лежащей в основе калькулятора: степенной закон удержания, воронка конверсии, расчёт выручки и юнит-экономики.</p>
   <div class="version-row">
     <span class="tag">Power-law retention</span>
@@ -189,7 +560,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Модель удержания: степенной закон</h2>
   </div>
   <div class="prose">
-    <p>Ядро калькулятора — степенная функция удержания, описывающая долю активных пользователей в период <em>t</em> после привлечения. Это стандартная модель для подписочных продуктов, потому что эмпирически удержание затухает по степенному, а не экспоненциальному закону — медленнее в начале и быстрее в долгосрочной перспективе.</p>
+    <p><strong>Удержание (Retention)</strong> — это доля пользователей из исходной когорты, которые остаются активными (продолжают платить за подписку) в каждый последующий период. Например, удержание на 4-й неделе = 10% означает, что из 100 привлечённых пользователей через 4 недели активны 10.</p>
+    <p><strong>Когорта</strong> — группа пользователей, привлечённых в один временной промежуток (например, за одну неделю или месяц). Все расчёты в калькуляторе ведутся для одной когорты.</p>
+    <p>Ядро калькулятора — степенная функция удержания. Это стандартная модель для подписочных продуктов: эмпирически удержание затухает по степенному, а не экспоненциальному закону — быстро теряет пользователей в первые периоды и значительно медленнее в дальнейшем.</p>
   </div>
 
   <div class="formula-box">
@@ -197,10 +570,15 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <div class="formula">R(t) = <span class="hi">a</span> · t<sup>−<span class="hi">b</span></sup></div>
     <div class="formula-note">
       R(t) — доля удержанных пользователей в период t (0 < R < 1)<br>
-      <span class="hi">a</span> — начальный коэффициент удержания<br>
-      <span class="hi">b</span> — скорость затухания (показатель степени, b > 0)<br>
+      <span class="hi">a</span> — начальный коэффициент удержания (масштаб кривой)<br>
+      <span class="hi">b</span> — положительный параметр затухания (b > 0); в формуле используется показатель степени −b<br>
       t — период (неделя или месяц) после привлечения, t ≥ 1
     </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">ℹ️</div>
+    <div class="callout-body"><strong>Почему b положительное, а в степени стоит −b?</strong> Параметр b описывает <em>скорость затухания</em> и всегда положителен (b > 0). Знак минус в показателе степени t<sup>−b</sup> означает, что функция убывает с ростом t: чем больше t, тем меньше R(t). Если бы степень была +b, функция бы росла — что противоречит логике оттока. Иными словами, b — это «сила» затухания, а «−» — это математический способ сказать «убывает». При b = 0 удержание не меняется вовсе (все остаются), при большом b кривая падает круто. Разделение знака и величины удобно: b всегда остаётся положительным числом, легко интерпретируемым и сравниваемым.</div>
   </div>
 
   <div class="callout blue">
@@ -216,7 +594,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Подбор параметров: log-log регрессия</h2>
   </div>
   <div class="prose">
-    <p>Параметры <em>a</em> и <em>b</em> оцениваются методом наименьших квадратов в лог-логарифмическом пространстве. Логарифмирование линеаризует степенную зависимость, что позволяет применить стандартную линейную регрессию.</p>
+    <p><strong>МНК (Метод наименьших квадратов, OLS — Ordinary Least Squares)</strong> — стандартный статистический метод подбора параметров, минимизирующий сумму квадратов отклонений между наблюдаемыми и предсказанными значениями.</p>
+    <p><strong>Log-log пространство</strong> — преобразование, при котором берётся логарифм обеих осей (и t, и R). В таком пространстве степенная зависимость превращается в прямую линию, к которой легко применить линейную регрессию.</p>
+    <p>Параметры <em>a</em> и <em>b</em> оцениваются МНК в лог-логарифмическом пространстве. Логарифмирование линеаризует степенную зависимость, что позволяет применить стандартную линейную регрессию.</p>
   </div>
 
   <div class="formula-box">
@@ -250,12 +630,8 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     </div>
     <div class="step">
       <div class="step-num">5</div>
-      <div class="step-body"><strong>Качество подгонки:</strong> R² рассчитывается в лог-пространстве. Значение R² ≥ 0.95 соответствует зелёному значку, 0.75–0.95 — жёлтому, ниже — красному.</div>
+      <div class="step-body"><strong>Качество подгонки (R²):</strong> R² («коэффициент детерминации») показывает, какую долю дисперсии данных объясняет модель. R² = 1 означает идеальное совпадение, R² = 0 — модель не объясняет данные. Рассчитывается в лог-пространстве. Значение R² ≥ 0.95 соответствует зелёному значку, 0.75–0.95 — жёлтому, ниже — красному.</div>
     </div>
-  </div>
-
-  <div class="formula-box">
-    <div class="formula-label">Формулы МНК</div>
     <div class="formula">
       Sxy = Σ (ln tᵢ − m̄ₜ)(ln Rᵢ − m̄ᵣ)<br>
       Sxx = Σ (ln tᵢ − m̄ₜ)²<br>
@@ -272,15 +648,18 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Доверительный интервал ±1σ</h2>
   </div>
   <div class="prose">
-    <p>Серая полоса вокруг кривой удержания — это интервал ±1 стандартного отклонения. Он учитывает неточность оценки наклона <em>b</em>, рассчитанной по конечному числу точек данных.</p>
+    <p><strong>Стандартное отклонение (σ)</strong> — мера разброса: показывает, насколько сильно отдельные значения отклоняются от среднего. Интервал ±1σ охватывает примерно 68% вероятных исходов при нормальном распределении.</p>
+    <p><strong>Стандартная ошибка SE(b)</strong> — оценка неточности в подборе параметра b. Чем меньше точек данных и чем хуже они ложатся на прямую, тем больше SE(b) и шире полоса неопределённости.</p>
+    <p><strong>SSR (Sum of Squared Residuals)</strong> — сумма квадратов отклонений реальных точек от предсказанных моделью значений в лог-пространстве. Чем меньше SSR, тем лучше подгонка.</p>
+    <p>Синяя полоса вокруг кривой удержания — интервал ±1 стандартного отклонения, учитывающий неточность оценки наклона <em>b</em> по конечному числу точек данных.</p>
   </div>
 
   <div class="formula-box">
     <div class="formula-label">Стандартная ошибка и границы</div>
     <div class="formula">
       SE(b) = √( (SSR / (n−2)) / Sxx )<br><br>
-      R<sub>upper</sub>(t) = exp( ln a + (b + <span class="hi">SE(b)</span>) · ln t )<br>
-      R<sub>lower</sub>(t) = exp( ln a + (b − <span class="hi">SE(b)</span>) · ln t )
+      R<sub>upper</sub>(t) = exp( ln a − (b − <span class="hi">SE(b)</span>) · ln t )<br>
+      R<sub>lower</sub>(t) = exp( ln a − (b + <span class="hi">SE(b)</span>) · ln t )
     </div>
     <div class="formula-note">
       SSR — сумма квадратов остатков в лог-пространстве<br>
@@ -302,6 +681,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Воронка конверсии</h2>
   </div>
   <div class="prose">
+    <p><strong>Воронка конверсии</strong> — последовательность шагов, которые пользователь проходит от первого контакта с продуктом до момента оплаты. В калькуляторе используется трёхуровневая воронка: установка → триал → платёж.</p>
+    <p><strong>Триал (Trial)</strong> — бесплатный пробный период, в ходе которого пользователь получает доступ к функциям продукта перед принятием решения о покупке.</p>
+    <p><strong>Payer base (база платящих)</strong> — реальное количество пользователей, с которых начисляется выручка. Это подмножество исходной когорты, прошедшее все шаги воронки.</p>
     <p>Когда воронка включена, расчёт LTV происходит только для тех пользователей, которые прошли оба шага конверсии: установка → триал → платёж.</p>
   </div>
 
@@ -337,6 +719,10 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Расчёт выручки за период</h2>
   </div>
   <div class="prose">
+    <p><strong>ARPPU (Average Revenue Per Paying User)</strong> — средний доход с одного платящего пользователя за один период (неделю или месяц). Это цена подписки до вычета комиссий и возвратов.</p>
+    <p><strong>Валовая выручка (Gross revenue)</strong> — полная сумма до вычета каких-либо комиссий, налогов и возвратов.</p>
+    <p><strong>Чистая выручка (Net revenue)</strong> — сумма, которая остаётся после вычета комиссии магазина приложений, НДС, возвратов и постоянных расходов.</p>
+    <p><strong>NetF (Net Factor)</strong> — мультипликатор, объединяющий все вычеты в одно число. Например, при комиссии 17%, НДС 10% и возвратах 20%: NetF = 0.83 × 0.90 × 0.80 ≈ 0.597.</p>
     <p>На каждом периоде t рассчитывается количество активных пользователей, затем из выручки вычитаются все коэффициенты потерь и фиксированные расходы.</p>
   </div>
 
@@ -378,6 +764,10 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <div class="section-number">06</div>
     <h2>LTV и LTV/CAC</h2>
   </div>
+  <div class="prose">
+    <p><strong>LTV (Lifetime Value)</strong> — суммарная выручка, которую генерирует один пользователь за весь прогнозный горизонт. Отвечает на вопрос: «Сколько денег мы получим с одного привлечённого (или платящего) пользователя?»</p>
+    <p><strong>CAC (Customer Acquisition Cost)</strong> — стоимость привлечения одного пользователя. Это суммарный бюджет на маркетинг, делённый на количество привлечённых пользователей в когорте.</p>
+  </div>
 
   <div class="formula-box">
     <div class="formula-label">Расчёт LTV</div>
@@ -412,6 +802,12 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
   <div class="section-header">
     <div class="section-number">07</div>
     <h2>ROI, ROAS и Payback</h2>
+  </div>
+  <div class="prose">
+    <p><strong>ROI (Return on Investment)</strong> — возврат на инвестиции в процентах. ROI = 100% означает, что на каждый вложенный рубль вернулось два: вложение плюс равная ему прибыль.</p>
+    <p><strong>ROAS (Return on Ad Spend)</strong> — аналог ROI, но в абсолютном мультипликаторе: ROAS = 2× означает, что каждый вложенный рубль вернул два. Связь: ROAS = 1 + ROI.</p>
+    <p><strong>Payback period</strong> — период окупаемости: момент, когда накопленная чистая выручка с когорты впервые покрывает суммарные расходы на её привлечение (CAC × размер когорты). До этого момента бизнес «в минусе» по данной когорте.</p>
+    <p><strong>CumNet(t)</strong> — накопленная (кумулятивная) чистая выручка от t = 1 до текущего периода.</p>
   </div>
 
   <div class="formula-box">
@@ -462,11 +858,8 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
 
   <div class="callout blue">
     <div class="callout-icon">📌</div>
-    <div class="callout-body"><strong>Ограничения модели.</strong> Степенной закон — это аппроксимация. Реальное удержание может иметь «ступеньки» (праздники, ребрендинг, сезонность). Рекомендуется использовать минимум 3–5 точек данных, охватывающих хотя бы 30–50% прогнозного горизонта.</div>
+    <div class="callout-body"><strong>Ограничения модели.</strong> Степенной закон — это аппроксимация. Реальное удержание может иметь «ступеньки» (праздники, ребрендинг, сезонность). Рекомендуется использовать минимум 3–5 точек данных, охватывающих хотя бы 30–50% прогнозного горизонта. Чем больше точек касания — тем точнее модель: МНК учитывает все наблюдения одновременно, и каждая дополнительная точка снижает стандартную ошибку SE(b) и сужает полосу неопределённости. Точки можно добавлять в любой момент во вкладке «Setup» — кнопка «Add».</div>
   </div>
-</div>
-
-</div><!-- /lang-ru -->
 
 <!-- ═══════════════ DIVIDER ═══════════════ -->
 <div class="lang-divider" id="en-start">English version below</div>
@@ -507,7 +900,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Retention model: the power law</h2>
   </div>
   <div class="prose">
-    <p>The core of the calculator is a power-law retention function describing the fraction of active users at period <em>t</em> after acquisition. This is a standard model for subscription products: empirically, retention decays following a power law rather than an exponential — slower at the start and more gradually over the long run.</p>
+    <p><strong>Retention</strong> is the fraction of users from the original cohort who remain active (continue paying for the subscription) in each subsequent period. For example, Week 4 retention of 10% means that out of 100 acquired users, 10 are still active after 4 weeks.</p>
+    <p><strong>Cohort</strong> is a group of users acquired within the same time window (e.g. one week or one month). All calculations in the calculator are performed for a single cohort.</p>
+    <p>The core of the calculator is a power-law retention function. This is a standard model for subscription products: empirically, retention decays following a power law rather than an exponential — losing users quickly in the first periods and then levelling off much more gradually.</p>
   </div>
 
   <div class="formula-box">
@@ -515,10 +910,15 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <div class="formula">R(t) = <span class="hi">a</span> · t<sup>−<span class="hi">b</span></sup></div>
     <div class="formula-note">
       R(t) — fraction of retained users at period t (0 < R < 1)<br>
-      <span class="hi">a</span> — initial retention coefficient<br>
-      <span class="hi">b</span> — decay rate (exponent, b > 0)<br>
+      <span class="hi">a</span> — initial retention coefficient (curve scale)<br>
+      <span class="hi">b</span> — positive decay parameter (b > 0); the formula uses exponent −b<br>
       t — period (week or month) after acquisition, t ≥ 1
     </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-icon">ℹ️</div>
+    <div class="callout-body"><strong>Why is b positive when the exponent is −b?</strong> The parameter b describes the <em>decay rate</em> and is always positive (b > 0). The minus sign in the exponent t<sup>−b</sup> means the function decreases as t grows: the larger t, the smaller R(t). If the exponent were +b, the function would increase — which contradicts the logic of churn. In other words, b is the "strength" of decay and the "−" is the mathematical way of saying "decreasing". When b = 0, retention never changes (everyone stays); with a large b, the curve drops steeply. Keeping the sign separate from the magnitude is convenient: b stays a positive number, easy to interpret and compare across products.</div>
   </div>
 
   <div class="callout blue">
@@ -534,7 +934,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Parameter fitting: log-log OLS regression</h2>
   </div>
   <div class="prose">
-    <p>Parameters <em>a</em> and <em>b</em> are estimated by Ordinary Least Squares in log-log space. Taking logarithms linearises the power-law relationship, enabling standard linear regression.</p>
+    <p><strong>OLS (Ordinary Least Squares)</strong> is a standard statistical method that finds parameter values minimising the sum of squared differences between observed and predicted values.</p>
+    <p><strong>Log-log space</strong> is a transformation where the logarithm of both axes is taken (both t and R). In this space, a power-law relationship becomes a straight line, to which standard linear regression can be directly applied.</p>
+    <p>Parameters <em>a</em> and <em>b</em> are estimated by OLS in log-log space. Taking logarithms linearises the power-law relationship, enabling standard linear regression.</p>
   </div>
 
   <div class="formula-box">
@@ -568,7 +970,7 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     </div>
     <div class="step">
       <div class="step-num">5</div>
-      <div class="step-body"><strong>Goodness of fit:</strong> R² is computed in log-space. R² ≥ 0.95 shows a green badge, 0.75–0.95 amber, below 0.75 red.</div>
+      <div class="step-body"><strong>Goodness of fit (R²):</strong> R² ("coefficient of determination") measures the fraction of variance in the data explained by the model. R² = 1 is a perfect fit; R² = 0 means the model explains nothing. It is computed in log-space. R² ≥ 0.95 shows a green badge, 0.75–0.95 amber, below 0.75 red.</div>
     </div>
   </div>
 
@@ -590,6 +992,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Confidence interval ±1σ</h2>
   </div>
   <div class="prose">
+    <p><strong>Standard deviation (σ)</strong> is a measure of spread: it shows how much individual values deviate from the mean. A ±1σ interval covers approximately 68% of probable outcomes under a normal distribution.</p>
+    <p><strong>Standard error SE(b)</strong> is an estimate of the uncertainty in the fitted parameter b. The fewer the data points and the worse they fit the line, the larger SE(b) and the wider the uncertainty band.</p>
+    <p><strong>SSR (Sum of Squared Residuals)</strong> is the sum of squared differences between observed values and model predictions in log-space. A smaller SSR indicates a better fit.</p>
     <p>The shaded band around the retention curve represents ±1 standard deviation. It accounts for estimation uncertainty in slope <em>b</em>, which is fit from a finite number of data points.</p>
   </div>
 
@@ -597,8 +1002,8 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <div class="formula-label">Standard error and bounds</div>
     <div class="formula">
       SE(b) = √( (SSR / (n−2)) / Sxx )<br><br>
-      R<sub>upper</sub>(t) = exp( ln a + (b + <span class="hi">SE(b)</span>) · ln t )<br>
-      R<sub>lower</sub>(t) = exp( ln a + (b − <span class="hi">SE(b)</span>) · ln t )
+      R<sub>upper</sub>(t) = exp( ln a − (b − <span class="hi">SE(b)</span>) · ln t )<br>
+      R<sub>lower</sub>(t) = exp( ln a − (b + <span class="hi">SE(b)</span>) · ln t )
     </div>
     <div class="formula-note">
       SSR — sum of squared residuals in log-space<br>
@@ -620,6 +1025,9 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Conversion funnel</h2>
   </div>
   <div class="prose">
+    <p><strong>Conversion funnel</strong> is the sequence of steps a user goes through from first encountering the product to making a payment. The calculator uses a three-stage funnel: install → trial → paid.</p>
+    <p><strong>Trial</strong> is a free evaluation period during which the user gets access to product features before deciding whether to purchase.</p>
+    <p><strong>Payer base</strong> is the actual number of users who generate revenue. It is a subset of the original cohort that has completed all funnel steps.</p>
     <p>When the funnel is enabled, LTV is calculated only for users who completed both conversion steps: install → trial → paid.</p>
   </div>
 
@@ -655,6 +1063,10 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <h2>Revenue calculation per period</h2>
   </div>
   <div class="prose">
+    <p><strong>ARPPU (Average Revenue Per Paying User)</strong> is the average revenue from one paying user per period (week or month). This is the subscription price before any commissions or refunds are deducted.</p>
+    <p><strong>Gross revenue</strong> is the total amount before any commissions, taxes, or refunds are deducted.</p>
+    <p><strong>Net revenue</strong> is the amount remaining after deducting the app store commission, VAT, refunds, and fixed costs.</p>
+    <p><strong>NetF (Net Factor)</strong> is a multiplier combining all вычеты into a single number. For example, with a 17% store fee, 10% VAT, and 20% refunds: NetF = 0.83 × 0.90 × 0.80 ≈ 0.597.</p>
     <p>At each period t, the number of active users is calculated, then all deduction factors and fixed costs are subtracted from gross revenue.</p>
   </div>
 
@@ -696,6 +1108,11 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
     <div class="section-number">06</div>
     <h2>LTV and LTV/CAC</h2>
   </div>
+  <div class="prose">
+    <p><strong>LTV (Lifetime Value)</strong> is the total revenue generated by one user over the entire forecast horizon. It answers the question: "How much money will we earn from one acquired (or paying) user?"</p>
+    <p><strong>CAC (Customer Acquisition Cost)</strong> is the cost of acquiring one user: total marketing spend divided by the number of users acquired in the cohort.</p>
+    <p><strong>LTV/CAC</strong> is the key unit-economics multiplier, showing how many times revenue from a user exceeds the cost of acquiring them. A ratio of ≥ 3 is the industry standard for healthy scalability.</p>
+  </div>
 
   <div class="formula-box">
     <div class="formula-label">LTV calculation</div>
@@ -730,6 +1147,12 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
   <div class="section-header">
     <div class="section-number">07</div>
     <h2>ROI, ROAS and Payback</h2>
+  </div>
+  <div class="prose">
+    <p><strong>ROI (Return on Investment)</strong> is the return on investment expressed as a percentage. ROI = 100% means that for every dollar invested, two dollars came back: the original investment plus equal profit.</p>
+    <p><strong>ROAS (Return on Ad Spend)</strong> is similar to ROI but expressed as an absolute multiplier: ROAS = 2× means every dollar spent returned two. The relationship is: ROAS = 1 + ROI.</p>
+    <p><strong>Payback period</strong> is the point in time when cumulative net revenue from the cohort first covers total acquisition spend (CAC × cohort size). Before this point, the business is "underwater" on that cohort.</p>
+    <p><strong>CumNet(t)</strong> is the cumulative net revenue from t = 1 through the current period.</p>
   </div>
 
   <div class="formula-box">
@@ -780,11 +1203,8 @@ code{font-family:var(--mono);color:var(--blue);background:var(--blue-soft);paddi
 
   <div class="callout blue">
     <div class="callout-icon">📌</div>
-    <div class="callout-body"><strong>Model limitations.</strong> The power law is an approximation. Real retention may exhibit step changes (seasonal effects, product changes, marketing campaigns). It is recommended to use at least 3–5 data points spanning at least 30–50% of the forecast horizon before drawing conclusions.</div>
+    <div class="callout-body"><strong>Model limitations.</strong> The power law is an approximation. Real retention may exhibit step changes (seasonal effects, product changes, marketing campaigns). It is recommended to use at least 3–5 data points spanning at least 30–50% of the forecast horizon before drawing conclusions. The more data points you add, the more accurate the model becomes: OLS fits all observations simultaneously, and each additional point reduces the standard error SE(b), narrowing the uncertainty band. Points can be added at any time in the Setup tab using the "Add" button.</div>
   </div>
-</div>
-
-</div><!-- /lang-en -->
 
 <div class="footer">
   LTV Calculator — Methodology · Static HTML · Power-law retention model
