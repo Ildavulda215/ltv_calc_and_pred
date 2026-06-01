@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LTV Calculator and Prediction</title>
+
+<h2 class="sr-only">LTV calculator — power-law retention model with funnel, ad revenue, cost structure, and confidence bands</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+#ltv{font-family:system-ui,sans-serif;font-size:14px}
+.tabs{display:flex;gap:4px;border-bottom:.5px solid var(--color-border-tertiary);padding:0 16px;align-items:center}
+.tab{display:flex;align-items:center;gap:6px;padding:10px 14px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:14px;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.bdg{font-size:12px;font-weight:500;padding:3px 10px;border-radius:var(--border-radius-md)}
+.bg{background:var(--color-background-success);color:var(--color-text-success)}
+.by{background:var(--color-background-warning);color:var(--color-text-warning)}
+.br{background:var(--color-background-danger);color:var(--color-text-danger)}
+.panel{padding:16px;display:none}
+.panel.on{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sec{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:12px}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.st{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;gap:8px}
+.row label{font-size:13px;color:var(--color-text-secondary);flex-shrink:0}
+input[type=number]{padding:5px 8px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:inherit;width:100px}
+.tog{display:flex;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);padding:2px;gap:2px}
+.tog button{padding:4px 12px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;background:transparent;color:var(--color-text-secondary)}
+.tog button.on{background:var(--color-background-primary);color:var(--color-text-primary)}
+.pt-hd{display:grid;grid-template-columns:62px 86px 26px;gap:4px;margin-bottom:6px}
+.pt-hd span{font-size:11px;color:var(--color-text-tertiary)}
+.pt-row{display:grid;grid-template-columns:62px 86px 26px;gap:4px;margin-bottom:5px;align-items:center}
+.pt-row input{width:100%}
+.delbtn{background:transparent;border:none;color:var(--color-text-tertiary);cursor:pointer;font-size:18px;line-height:1;padding:0}
+.addbtn{display:flex;align-items:center;gap:4px;padding:3px 10px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:13px;font-family:inherit}
+.fml{margin-top:12px;padding:10px 12px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);border-left:2px solid var(--color-border-secondary);font-size:12px;line-height:1.8;display:none}
+.fml .hi{color:var(--color-text-info);font-weight:500;font-family:var(--font-mono)}
+.fml .sm{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.mc4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.mc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.mc .ml{font-size:12px;color:var(--color-text-tertiary);margin-bottom:4px}
+.mc .mv{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.mc .ms{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
+.roi-bx{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px}
+.roi-g{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.rl{font-size:12px;color:var(--color-text-tertiary)}
+.rv{font-size:22px;font-weight:500}
+.rs{font-size:12px;color:var(--color-text-tertiary)}
+.cbx{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px}
+.ct{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.cs{font-size:12px;color:var(--color-text-tertiary);margin-bottom:10px}
+.cg{color:var(--color-text-success)}.cy{color:var(--color-text-warning)}.cr{color:var(--color-text-danger)}.cgr{color:var(--color-text-tertiary)}
+.empty{padding:48px;text-align:center;color:var(--color-text-tertiary)}
+.fbx{margin-top:6px;padding:8px 10px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);font-size:13px}
+
+    .nav-pill{ text-decoration:none; transition:all 160ms ease-out; }
+    .nav-pill:hover{ color:var(--blue); border-color:rgba(37,99,235,.35); transform:translateY(-1px); box-shadow:0 8px 18px rgba(15,23,42,.06); }
+  </style>
+
+<style>
+:root{
+  --color-border-tertiary:#E2E8F0;--color-border-secondary:#E2E8F0;
+  --color-background-primary:#FFFFFF;--color-background-secondary:#FFFFFF;--color-background-tertiary:#F1F5F9;
+  --color-text-primary:#0F172A;--color-text-secondary:#475569;--color-text-tertiary:#94A3B8;
+  --color-background-success:rgba(22,163,74,.10);--color-text-success:#16A34A;
+  --color-background-warning:rgba(245,158,11,.12);--color-text-warning:#B45309;
+  --color-background-danger:rgba(220,38,38,.10);--color-text-danger:#DC2626;
+  --color-text-info:#2563EB;--border-radius-md:14px;--border-radius-lg:22px;--font-mono:"IBM Plex Mono","Roboto Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:#0F172A;background:radial-gradient(circle at 8% 0%,rgba(37,99,235,.10),transparent 30%),radial-gradient(circle at 94% 8%,rgba(22,163,74,.08),transparent 25%),linear-gradient(180deg,#fff 0%,#F8FAFC 38%,#F8FAFC 100%)}
+.page-shell{max-width:1440px;margin:0 auto;padding:28px 28px 72px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px;padding:14px 18px;border:1px solid rgba(226,232,240,.9);border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(15,23,42,.05);backdrop-filter:blur(14px);position:sticky;top:16px;z-index:20}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}.brand-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:13px;color:white;background:linear-gradient(135deg,#2563EB,#0F766E);box-shadow:0 12px 22px rgba(37,99,235,.24);font-size:13px}.top-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pill{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid #E2E8F0;background:#fff;color:#475569;font-size:13px;font-weight:650}.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:22px;margin-bottom:22px}.hero-card,.insight-card{background:rgba(255,255,255,.92);border:1px solid rgba(226,232,240,.9);border-radius:28px;box-shadow:0 18px 48px rgba(15,23,42,.08);backdrop-filter:blur(12px)}.hero-card{padding:44px;position:relative;overflow:hidden}.hero-card:after{content:"";position:absolute;right:-120px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.14),transparent 66%)}.eyebrow{display:inline-flex;align-items:center;margin-bottom:20px;padding:8px 12px;border-radius:999px;background:rgba(37,99,235,.10);color:#2563EB;font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:800}.hero h1{max-width:760px;font-size:clamp(42px,5vw,72px);line-height:.96;letter-spacing:-.065em;font-weight:850;margin:0 0 20px;position:relative;z-index:1}.lead{max-width:680px;color:#475569;font-size:18px;line-height:1.65;position:relative;z-index:1}.insight-card{padding:28px;display:flex;flex-direction:column;gap:18px;justify-content:space-between}.insight-title{color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:800}.insight-main{font-size:22px;line-height:1.3;letter-spacing:-.035em;font-weight:800}.insight-copy{color:#475569;line-height:1.6;font-size:14px}.calculator-shell{background:rgba(255,255,255,.72);border:1px solid rgba(226,232,240,.9);border-radius:30px;padding:18px;box-shadow:0 18px 48px rgba(15,23,42,.08)}
+#ltv{font-family:Inter,"IBM Plex Sans",system-ui,sans-serif;font-size:14px}.tabs{border:1px solid #E2E8F0;border-radius:999px;background:#F8FAFC;padding:6px;margin-bottom:16px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.tab{border-radius:999px;border:0;margin:0;padding:10px 18px;font-weight:750;color:#475569}.tab.on{background:#0F172A;color:#fff;border-bottom-color:transparent;box-shadow:0 8px 18px rgba(15,23,42,.16)}.panel{padding:0}.g2{grid-template-columns:minmax(340px,.39fr) minmax(0,.61fr);gap:16px}.sec,.mc,.roi-bx,.cbx{background:#fff;border:1px solid #E2E8F0;border-radius:22px;box-shadow:0 8px 24px rgba(15,23,42,.05)}.sec{padding:18px;margin-bottom:14px}.st{font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}.st:before{content:"";width:7px;height:7px;border-radius:50%;background:#2563EB;box-shadow:0 0 0 5px rgba(37,99,235,.10)}.row{margin-bottom:11px;gap:14px}.row label{font-weight:650;color:#475569}input[type=number]{padding:9px 10px;border:1px solid #E2E8F0;border-radius:12px;background:#fff;color:#0F172A;font-family:var(--font-mono);width:112px;outline:none}input[type=number]:focus{border-color:rgba(37,99,235,.65);box-shadow:0 0 0 4px rgba(37,99,235,.10)}.tog{background:#F1F5F9;border:1px solid #E2E8F0;border-radius:999px;padding:4px}.tog button{border-radius:999px;min-height:30px;font-weight:700}.tog button.on{background:#fff;color:#2563EB;box-shadow:0 5px 12px rgba(15,23,42,.08)}.addbtn{height:32px;padding:0 12px;border-radius:999px;background:#fff;font-weight:700}.pt-hd,.pt-row{grid-template-columns:78px 110px 32px;gap:7px}.delbtn{width:30px;height:30px;border-radius:10px}.fml,.fbx{padding:12px 14px;background:#F8FAFC;border:1px solid #EEF2F7;border-left:3px solid #2563EB;border-radius:14px}.mc4{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.mc{padding:20px;min-height:128px;position:relative;overflow:hidden}.mc:after{content:"";position:absolute;right:-36px;bottom:-48px;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.08),transparent 68%)}.mc .ml{font-size:12px;color:#94A3B8;margin-bottom:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.mc .mv{font-size:30px;font-weight:850;line-height:1.05;letter-spacing:-.045em;font-family:var(--font-mono)}.mc .ms{font-size:12px;color:#94A3B8;margin-top:8px}.roi-bx,.cbx{padding:20px;margin-bottom:16px}.roi-g{gap:14px}.roi-g>div{padding:16px;border:1px solid #EEF2F7;border-radius:14px;background:#F8FAFC}.rl{font-size:12px;color:#94A3B8;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.rv{font-size:26px;font-weight:850;font-family:var(--font-mono);letter-spacing:-.04em;margin-top:6px}.rs{font-size:12px;color:#94A3B8;margin-top:5px}.ct{font-size:18px;font-weight:800;letter-spacing:-.03em}.cs{font-size:13px;color:#94A3B8;margin-bottom:14px}.bdg{display:inline-flex;align-items:center;min-height:30px;font-size:12px;font-weight:800;padding:0 12px;border-radius:999px}.empty{border:1px solid #E2E8F0;border-radius:22px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)}.decision-card{margin:0 0 16px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,#0F172A,#172554);color:white;box-shadow:0 18px 48px rgba(15,23,42,.12);position:relative;overflow:hidden}.decision-card:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-100px;top:-110px;background:radial-gradient(circle,rgba(59,130,246,.34),transparent 62%)}.decision-label{color:#93C5FD;text-transform:uppercase;font-size:11px;font-weight:850;letter-spacing:.08em;margin-bottom:8px;position:relative;z-index:1}.decision-text{color:#E2E8F0;font-size:14px;line-height:1.65;position:relative;z-index:1}.footer-note{margin-top:18px;text-align:center;color:#94A3B8;font-size:12px}.cg{color:#16A34A!important}.cy{color:#B45309!important}.cr{color:#DC2626!important}.cgr{color:#94A3B8!important}@media(max-width:1080px){.hero{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.mc4{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.page-shell{padding:16px 14px 48px}.topbar{border-radius:22px;align-items:flex-start;flex-direction:column}.hero-card,.insight-card{padding:26px;border-radius:24px}.mc4,.roi-g{grid-template-columns:1fr}.calculator-shell{padding:12px;border-radius:24px}.pt-hd,.pt-row{grid-template-columns:1fr 1fr 32px}}
+</style>
+
+
+</head>
+<body>
+<main class="page-shell">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">LTV</div><span>LTV Calculator and Prediction</span></div>
+    <div class="top-meta"><span class="pill">Power-law retention</span><span class="pill">Subscription economics</span><span class="pill">UA payback model</span>
+        <a class="pill nav-pill" href="methodology.html">Methodology</a></div>
+  </header>
+  <section class="hero">
+    <div class="hero-card">
+      <div class="eyebrow">Growth & Unit Economics Workstation</div>
+      <h1>LTV Calculator and Prediction</h1>
+      <p class="lead">Forecast subscription economics, retention decay, payback, ROAS and long-term cohort value before scaling user acquisition.</p>
+    </div>
+    <aside class="insight-card">
+      <div><div class="insight-title">Decision layer</div><div class="insight-main">Turn retention points into a capital allocation signal.</div></div>
+      <p class="insight-copy">Use cohort size, CAC, funnel conversion, ARPPU, refunds, taxes and fixed costs to understand whether the acquisition model can scale.</p>
+    </aside>
+  </section>
+  <section class="calculator-shell">
+<div id="ltv">
+<div class="tabs">
+  <button class="tab on" id="tab-s" onclick="sw('s')"><i class="ti ti-settings" aria-hidden="true"></i> Setup</button>
+  <button class="tab" id="tab-r" onclick="sw('r')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Results</button>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center;padding-bottom:8px" id="fit-info"></div>
+</div>
+
+<div class="panel on" id="p-s">
+ <div class="g2">
+  <div>
+   <div class="sec">
+    <div class="sh"><span class="st">Cohort & horizon</span></div>
+    <div class="row"><label>Cohort size</label><input type="number" id="i-co" value="100000" min="1" oninput="upd()"></div>
+    <div class="row"><label>CAC ($)</label><input type="number" id="i-ca" value="18.54" step="0.01" oninput="upd()"></div>
+    <div class="row"><label>Period</label>
+     <div class="tog">
+      <button class="on" id="tw" onclick="sp('week')">Weekly</button>
+      <button id="tm" onclick="sp('month')">Monthly</button>
+     </div>
+    </div>
+    <div class="row"><label>Horizon</label>
+     <div style="display:flex;align-items:center;gap:6px">
+      <input type="number" id="i-h" value="52" min="4" max="260" style="width:70px" oninput="upd()">
+      <span id="plbl" style="font-size:13px;color:var(--color-text-secondary)">weeks</span>
+     </div>
+    </div>
+   </div>
+   <div class="sec">
+    <div class="sh"><span class="st">Conversion funnel</span>
+     <label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:13px;color:var(--color-text-secondary)">
+      <input type="checkbox" id="i-fn" onchange="upd()"> enable
+     </label>
+    </div>
+    <div id="ff" style="display:none">
+     <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px">Install → trial → paid</div>
+     <div class="row"><label>Install → trial %</label><input type="number" id="i-tr" value="50" min="0" max="100" step="0.5" oninput="upd()"></div>
+     <div class="row"><label>Trial → paid %</label><input type="number" id="i-pd" value="40" min="0" max="100" step="0.5" oninput="upd()"></div>
+     <div class="fbx" id="pb-info"></div>
+    </div>
+    <div id="fo" style="font-size:13px;color:var(--color-text-tertiary)">Disabled — full cohort = payer base</div>
+   </div>
+   <div class="sec">
+    <div class="sh"><span class="st">Revenue per active user / period</span></div>
+    <div class="row"><label>ARPPU ($)</label><input type="number" id="i-ar" value="10.11" step="0.01" oninput="upd()"></div>
+    <div class="row"><label>Ad revenue ($)</label><input type="number" id="i-ad" value="0.30" step="0.01" oninput="upd()"></div>
+   </div>
+   <div class="sec">
+    <div class="sh"><span class="st">Deductions & costs</span></div>
+    <div class="row"><label>Store fee %</label><input type="number" id="i-fe" value="17" min="0" max="50" style="width:70px" oninput="upd()"></div>
+    <div class="row"><label>VAT %</label><input type="number" id="i-vt" value="10" min="0" max="50" style="width:70px" oninput="upd()"></div>
+    <div class="row"><label>Refund rate %</label><input type="number" id="i-rf" value="20" min="0" max="100" style="width:70px" oninput="upd()"></div>
+    <div class="row"><label>Fixed costs / month ($)</label><input type="number" id="i-fx" value="154500" step="100" oninput="upd()"></div>
+   </div>
+  </div>
+  <div>
+   <div class="sec">
+    <div class="sh"><span class="st">Retention data points</span>
+     <button class="addbtn" onclick="addPt()"><i class="ti ti-plus" aria-hidden="true" style="font-size:14px"></i> Add</button>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:12px;line-height:1.6">
+     Min 2 points. Model: R(t) = a · t<sup style="font-size:9px">−b</sup><br>
+     t = 1 → first <span id="plbl2">week</span> after acquisition.
+    </div>
+    <div class="pt-hd"><span id="ptcol">t (W)</span><span>Retention %</span><span></span></div>
+    <div id="ptc"></div>
+    <div class="fml" id="fml">
+     <div>R(t) = <span class="hi" id="fa">?</span> · t<sup style="font-size:9px">−</sup><span class="hi" id="fb">?</span></div>
+     <div class="sm" id="fm"></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div class="panel" id="p-r">
+ <div id="r-empty" class="empty"><i class="ti ti-chart-line" aria-hidden="true" style="font-size:36px;display:block;margin-bottom:8px"></i>Add at least 2 retention points in Setup</div>
+ <div id="r-cont" style="display:none">
+  <div class="decision-card"><div class="decision-label">AI-style insight</div><div class="decision-text" id="ai-insight">The model evaluates payback, LTV/CAC and retention decay once results are calculated.</div></div>
+  <div class="mc4">
+   <div class="mc"><div class="ml">LTV / acquired</div><div class="mv" id="r-ltva">—</div><div class="ms" id="r-ltvas">—</div></div>
+   <div class="mc"><div class="ml">LTV / paid user</div><div class="mv" id="r-ltvp">—</div><div class="ms" id="r-ltvps">—</div></div>
+   <div class="mc"><div class="ml">LTV / CAC</div><div class="mv" id="r-lc">—</div><div class="ms">≥ 3 = healthy</div></div>
+   <div class="mc"><div class="ml">Payback</div><div class="mv" id="r-pb">—</div><div class="ms">first profitable period</div></div>
+  </div>
+  <div class="roi-bx">
+   <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">ROI and ROAS by horizon</div>
+   <div class="roi-g">
+    <div><div class="rl">M3</div><div class="rv" id="r3">—</div><div class="rs" id="rs3">—</div></div>
+    <div><div class="rl">M6</div><div class="rv" id="r6">—</div><div class="rs" id="rs6">—</div></div>
+    <div><div class="rl">M12</div><div class="rv" id="r12">—</div><div class="rs" id="rs12">—</div></div>
+   </div>
+  </div>
+  <div class="cbx">
+   <div class="ct">Retention curve</div>
+   <div class="cs" id="ret-sub">Shaded band = ±1σ confidence · amber dots = observed data</div>
+   <div style="position:relative;height:200px"><canvas id="rc" role="img" aria-label="Retention curve with power-law fit and confidence band"></canvas></div>
+  </div>
+  <div class="cbx">
+   <div class="ct">Cumulative net revenue</div>
+   <div class="cs" id="rev-sub">After store fee, VAT, refunds and fixed costs</div>
+   <div style="position:relative;height:200px"><canvas id="vc" role="img" aria-label="Cumulative net revenue over time with CAC spend reference line"></canvas></div>
+  </div>
+ </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function fitPL(pts){
+  const v=pts.filter(p=>p.t>0&&p.r>0&&p.r<100);
+  if(v.length<2)return null;
+  const n=v.length,lT=v.map(p=>Math.log(p.t)),lR=v.map(p=>Math.log(p.r/100));
+  const mT=lT.reduce((s,x)=>s+x,0)/n,mR=lR.reduce((s,x)=>s+x,0)/n;
+  let Sxy=0,Sxx=0;
+  for(let i=0;i<n;i++){Sxy+=(lT[i]-mT)*(lR[i]-mR);Sxx+=(lT[i]-mT)**2;}
+  if(Math.abs(Sxx)<1e-10)return null;
+  const b=Sxy/Sxx,logA=mR-b*mT,a=Math.exp(logA);
+  const preds=lT.map(lt=>logA+b*lt);
+  const ssT=lR.reduce((s,y)=>s+(y-mR)**2,0),ssR=lR.reduce((s,y,i)=>s+(y-preds[i])**2,0);
+  const r2=ssT>0?Math.max(0,1-ssR/ssT):1;
+  const seb=Math.sqrt(Math.max(0,(ssR/Math.max(1,n-2))/Math.max(1e-10,Sxx)));
+  return{a,b,logA,r2,seb};
+}
+function pR(t,fit,sig){
+  if(!fit||t<=0)return 0;
+  return Math.min(1,Math.max(0,Math.exp(fit.logA+(fit.b+sig*fit.seb)*Math.log(t))));
+}
+function f$(n){
+  if(n==null||isNaN(n))return'—';
+  const s=n<0?'-':'',a=Math.abs(n);
+  if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';
+  if(a>=1e3)return s+'$'+(a/1e3).toFixed(1)+'K';
+  return s+'$'+a.toFixed(2);
+}
+function fp(n){return n==null||isNaN(n)?'—':(n>=0?'+':'')+(n*100).toFixed(1)+'%';}
+function fY(n){const a=Math.abs(n),s=n<0?'-':'';if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';if(a>=1e3)return s+'$'+(a/1e3).toFixed(0)+'K';return s+'$'+a.toFixed(0);}
+
+let per='week';
+let pts=[{id:1,t:1,r:30},{id:2,t:2,r:15},{id:3,t:4,r:10},{id:4,t:8,r:5},{id:5,t:24,r:3}];
+let nid=6,RC=null,VC=null;
+
+function gi(id){return+document.getElementById(id).value;}
+
+function rPts(){
+  const pL=per==='week'?'W':'M';
+  document.getElementById('ptcol').textContent='t ('+pL+')';
+  const c=document.getElementById('ptc');c.innerHTML='';
+  [...pts].sort((a,b)=>a.t-b.t).forEach(p=>{
+    const d=document.createElement('div');d.className='pt-row';
+    d.innerHTML=`<input type="number" value="${p.t}" min="1" style="width:100%" onchange="uPt(${p.id},'t',this.value)"><input type="number" value="${p.r}" min="0.01" max="99.9" step="0.1" style="width:100%" onchange="uPt(${p.id},'r',this.value)"><button class="delbtn" onclick="dPt(${p.id})" ${pts.length<=2?'disabled':''} style="opacity:${pts.length<=2?.3:1}">×</button>`;
+    c.appendChild(d);
+  });
+}
+function addPt(){pts.push({id:nid++,t:(pts[pts.length-1]?.t||0)+4,r:2});rPts();upd();}
+function dPt(id){if(pts.length<=2)return;pts=pts.filter(p=>p.id!==id);rPts();upd();}
+function uPt(id,f,v){pts=pts.map(p=>p.id===id?{...p,[f]:+v}:p);upd();}
+
+function sp(p){
+  per=p;
+  document.getElementById('tw').classList.toggle('on',p==='week');
+  document.getElementById('tm').classList.toggle('on',p==='month');
+  document.getElementById('plbl').textContent=p==='week'?'weeks':'months';
+  document.getElementById('plbl2').textContent=p==='week'?'week':'month';
+  rPts();upd();
+}
+function sw(t){
+  document.getElementById('p-s').classList.toggle('on',t==='s');
+  document.getElementById('p-r').classList.toggle('on',t==='r');
+  document.getElementById('tab-s').classList.toggle('on',t==='s');
+  document.getElementById('tab-r').classList.toggle('on',t==='r');
+  if(t==='r')upd();
+}
+
+function upd(){
+  const co=gi('i-co'),ca=gi('i-ca'),h=gi('i-h'),fn=document.getElementById('i-fn').checked;
+  const tr=gi('i-tr'),pd=gi('i-pd'),ar=gi('i-ar'),ad=gi('i-ad');
+  const fe=gi('i-fe'),vt=gi('i-vt'),rf=gi('i-rf'),fx=gi('i-fx');
+  const pbase=fn?co*(tr/100)*(pd/100):co;
+  const pL=per==='week'?'W':'M';
+  const pFix=fx/(per==='week'?4.333:1);
+  const netF=(1-fe/100)*(1-vt/100)*(1-rf/100);
+  const maxT=pts.length>0?Math.max(...pts.map(p=>p.t)):1;
+  const overX=h>3*maxT;
+  const fit=fitPL(pts);
+
+  document.getElementById('ff').style.display=fn?'block':'none';
+  document.getElementById('fo').style.display=fn?'none':'block';
+  if(fn){document.getElementById('pb-info').innerHTML='Payer base: <b style="font-weight:500;color:var(--color-text-primary)">'+Math.round(pbase).toLocaleString()+'</b> <span style="color:var(--color-text-tertiary)">('+((pbase/co)*100).toFixed(1)+'% of cohort)</span>';}
+
+  const fi=document.getElementById('fit-info');
+  if(fit){
+    const cls=fit.r2>=0.95?'bg':fit.r2>=0.75?'by':'br';
+    fi.innerHTML='<span class="bdg '+cls+'">R² '+(fit.r2*100).toFixed(0)+'%</span>'+(overX?'<span class="bdg by"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:13px;margin-right:3px"></i>'+Math.round(h/maxT)+'× beyond data</span>':'');
+    document.getElementById('fml').style.display='block';
+    document.getElementById('fa').textContent=fit.a.toFixed(4);
+    document.getElementById('fb').textContent=Math.abs(fit.b).toFixed(4);
+    document.getElementById('fm').textContent='SE(b) = '+fit.seb.toFixed(4)+' · n = '+pts.length+' points';
+  } else {
+    fi.innerHTML='';document.getElementById('fml').style.display='none';
+  }
+
+  if(!fit){
+    document.getElementById('r-empty').style.display='block';
+    document.getElementById('r-cont').style.display='none';
+    return;
+  }
+  document.getElementById('r-empty').style.display='none';
+  document.getElementById('r-cont').style.display='block';
+
+  const spend=co*ca;
+  const rows=[];let cumG=0,cumN=0,payback=null;
+  for(let t=1;t<=h;t++){
+    const r=pR(t,fit,0)*100,rHi=pR(t,fit,1)*100,rLo=pR(t,fit,-1)*100;
+    const act=pbase*r/100;
+    const gross=act*ar+act*ad;
+    const net=act*ar*netF+act*ad-pFix;
+    cumG+=gross;cumN+=net;
+    if(!payback&&cumN>=spend)payback=t;
+    const actual=pts.find(p=>p.t===t)?.r??null;
+    rows.push({t,r,rHi,rLo,actual,cumN,cumG});
+  }
+
+  const ltva=cumG/co,ltvp=pbase>0?cumG/pbase:0,lc=ca>0?ltva/ca:null;
+  const roi=t=>{if(!t||t>rows.length)return null;return spend>0?(rows[t-1].cumN-spend)/spend:null;};
+  const m3=per==='week'?13:3,m6=per==='week'?26:6,m12=per==='week'?52:12;
+  const r3=roi(Math.min(m3,h)),r6=roi(Math.min(m6,h)),r12=roi(Math.min(m12,h));
+
+  document.getElementById('r-ltva').textContent=f$(ltva);
+  document.getElementById('r-ltvas').textContent=h+pL+' horizon';
+  document.getElementById('r-ltvp').textContent=f$(ltvp);
+  document.getElementById('r-ltvps').textContent=pbase<co?((pbase/co)*100).toFixed(0)+'% of cohort':'full cohort';
+  const lce=document.getElementById('r-lc');
+  lce.textContent=lc!=null?lc.toFixed(2)+'×':'—';
+  lce.className='mv '+(lc>=3?'cg':lc>=1?'cy':'cr');
+  const pbe=document.getElementById('r-pb');
+  pbe.textContent=payback?payback+pL:'Not reached';
+  pbe.className='mv '+(payback?'cg':'cr');
+
+  [[r3,'3'],[r6,'6'],[r12,'12']].forEach(([v,n])=>{
+    const e=document.getElementById('r'+n);
+    e.textContent=fp(v);e.className='rv '+(v==null?'cgr':v>=0?'cg':'cr');
+    document.getElementById('rs'+n).textContent='ROAS '+(v!=null?((1+(v||0)).toFixed(2))+'×':'—');
+  });
+
+  const step=Math.max(1,Math.ceil(h/52));
+  const cd=rows.filter((_,i)=>i%step===0||i===rows.length-1);
+  const labels=cd.map(r=>pL+r.t);
+  const dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const gc=dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
+  const ac=dk?'#64748b':'#94a3b8';
+  const tb=dk?'#1e293b':'#fff';const tbd=dk?'#334155':'#e2e8f0';
+
+  document.getElementById('ret-sub').textContent='R(t) = '+fit.a.toFixed(3)+' · t⁻'+Math.abs(fit.b).toFixed(3)+' · shaded = ±1σ · amber dots = observed';
+
+  if(RC)RC.destroy();
+  RC=new Chart(document.getElementById('rc'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Lower',data:cd.map(r=>+r.rLo.toFixed(2)),borderWidth:0,pointRadius:0,fill:false,borderColor:'transparent',backgroundColor:'transparent'},
+      {label:'Upper',data:cd.map(r=>+r.rHi.toFixed(2)),borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:'rgba(59,130,246,0.18)',borderColor:'transparent'},
+      {label:'Fitted R(t)',data:cd.map(r=>+r.r.toFixed(2)),borderColor:'#3b82f6',borderWidth:2,pointRadius:0,fill:false,tension:.3},
+      {label:'Observed',data:cd.map(r=>r.actual),borderWidth:0,pointRadius:cd.map(r=>r.actual!=null?5:0),pointBackgroundColor:'#f59e0b',pointBorderColor:'white',pointBorderWidth:1.5,fill:false,borderColor:'transparent',spanGaps:false}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:200},
+      interaction:{intersect:false,mode:'index'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:tb,borderColor:tbd,borderWidth:1,titleColor:ac,bodyColor:dk?'#e2e8f0':'#1e293b',
+          callbacks:{label:ctx=>{
+            if(ctx.dataset.label==='Lower'||ctx.dataset.label==='Upper')return null;
+            if(ctx.dataset.label==='Observed'&&ctx.raw==null)return null;
+            return ctx.dataset.label+': '+(ctx.raw!=null?ctx.raw.toFixed(2)+'%':'—');
+          }}
+        }
+      },
+      scales:{
+        x:{grid:{color:gc},ticks:{color:ac,font:{size:11}},border:{display:false}},
+        y:{grid:{color:gc},ticks:{color:ac,font:{size:11},callback:v=>v+'%'},border:{display:false},min:0}
+      }
+    }
+  });
+
+  document.getElementById('rev-sub').textContent='After store fee ('+fe+'%) · VAT ('+vt+'%) · refunds ('+rf+'%) · fixed costs · dashed = CAC spend';
+
+  const revDs=[
+    {label:'Net revenue',data:cd.map(r=>Math.round(r.cumN)),borderColor:'#22c55e',borderWidth:2,fill:true,backgroundColor:'rgba(34,197,94,0.10)',pointRadius:0,tension:.3}
+  ];
+  if(spend>0){revDs.push({label:'CAC spend',data:cd.map(()=>Math.round(spend)),borderColor:'rgba(245,158,11,0.8)',borderWidth:1.5,borderDash:[6,4],fill:false,pointRadius:0});}
+
+  if(VC)VC.destroy();
+  VC=new Chart(document.getElementById('vc'),{
+    type:'line',
+    data:{labels,datasets:revDs},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:200},
+      interaction:{intersect:false,mode:'index'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:tb,borderColor:tbd,borderWidth:1,titleColor:ac,bodyColor:dk?'#e2e8f0':'#1e293b',
+          callbacks:{label:ctx=>ctx.dataset.label==='CAC spend'?'CAC spend: '+f$(ctx.raw):'Net revenue: '+f$(ctx.raw)}
+        }
+      },
+      scales:{
+        x:{grid:{color:gc},ticks:{color:ac,font:{size:11}},border:{display:false}},
+        y:{grid:{color:gc},ticks:{color:ac,font:{size:11},callback:v=>fY(v)},border:{display:false}}
+      }
+    }
+  });
+}
+
+rPts();upd();
+</script>
+
+  </section>
+  <div class="footer-note">Static HTML calculator · ready for GitHub Pages</div>
+</main>
+<script>
+(function(){
+ const oldUpd = window.upd;
+ if (typeof oldUpd === 'function') {
+   window.upd = function(){
+     oldUpd();
+     const lcTxt=(document.getElementById('r-lc')||{}).textContent||'';
+     const pbTxt=(document.getElementById('r-pb')||{}).textContent||'—';
+     const ai=document.getElementById('ai-insight');
+     const lc=parseFloat(lcTxt.replace('×',''));
+     if(ai && !Number.isNaN(lc)){
+       if(lc>=3) ai.textContent=`The current model looks scalable: LTV/CAC is ${lcTxt}, with projected payback at ${pbTxt}. Validate with more cohort points before increasing budgets aggressively.`;
+       else if(lc>=1) ai.textContent=`The model is marginal: LTV/CAC is ${lcTxt} and payback is ${pbTxt}. Improve W4/W8 retention, reduce CAC, or increase ARPPU before scaling.`;
+       else ai.textContent=`The model is currently unprofitable: LTV/CAC is ${lcTxt}. Scaling paid acquisition would likely destroy margin unless CAC drops or retention/revenue improves.`;
+     }
+   };
+   window.upd();
+ }
+})();
+</script>
+</body>
+</html>
