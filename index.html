@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LTV Calculator and Prediction</title>
-<h2 class="sr-only">LTV calculator — power-law retention model with funnel, ad revenue, cost structure, and confidence bands</h2>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
@@ -111,10 +110,18 @@ input[type=number]{padding:5px 8px;border:.5px solid var(--color-border-secondar
 body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:#0F172A;background:radial-gradient(circle at 8% 0%,rgba(37,99,235,.10),transparent 30%),radial-gradient(circle at 94% 8%,rgba(22,163,74,.08),transparent 25%),linear-gradient(180deg,#fff 0%,#F8FAFC 38%,#F8FAFC 100%)}
 .page-shell{max-width:1440px;margin:0 auto;padding:28px 28px 72px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px;padding:14px 18px;border:1px solid rgba(226,232,240,.9);border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(15,23,42,.05);backdrop-filter:blur(14px);position:sticky;top:16px;z-index:20}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}.brand-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:13px;color:white;background:linear-gradient(135deg,#2563EB,#0F766E);box-shadow:0 12px 22px rgba(37,99,235,.24);font-size:13px}.top-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pill{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid #E2E8F0;background:#fff;color:#475569;font-size:13px;font-weight:650}.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:22px;margin-bottom:22px}.hero-card,.insight-card{background:rgba(255,255,255,.92);border:1px solid rgba(226,232,240,.9);border-radius:28px;box-shadow:0 18px 48px rgba(15,23,42,.08);backdrop-filter:blur(12px)}.hero-card{padding:44px;position:relative;overflow:hidden}.hero-card:after{content:"";position:absolute;right:-120px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.14),transparent 66%)}.eyebrow{display:inline-flex;align-items:center;margin-bottom:20px;padding:8px 12px;border-radius:999px;background:rgba(37,99,235,.10);color:#2563EB;font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:800}.hero h1{max-width:760px;font-size:clamp(42px,5vw,72px);line-height:.96;letter-spacing:-.065em;font-weight:850;margin:0 0 20px;position:relative;z-index:1}.lead{max-width:680px;color:#475569;font-size:18px;line-height:1.65;position:relative;z-index:1}.insight-card{padding:28px;display:flex;flex-direction:column;gap:18px;justify-content:space-between}.insight-title{color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:800}.insight-main{font-size:22px;line-height:1.3;letter-spacing:-.035em;font-weight:800}.insight-copy{color:#475569;line-height:1.6;font-size:14px}.calculator-shell{background:rgba(255,255,255,.72);border:1px solid rgba(226,232,240,.9);border-radius:30px;padding:18px;box-shadow:0 18px 48px rgba(15,23,42,.08)}
 #ltv{font-family:Inter,"IBM Plex Sans",system-ui,sans-serif;font-size:14px}.tabs{border:1px solid #E2E8F0;border-radius:999px;background:#F8FAFC;padding:6px;margin-bottom:16px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.tab{border-radius:999px;border:0;margin:0;padding:10px 18px;font-weight:750;color:#475569}.tab.on{background:#0F172A;color:#fff;border-bottom-color:transparent;box-shadow:0 8px 18px rgba(15,23,42,.16)}.panel{padding:0}.g2{grid-template-columns:minmax(340px,.39fr) minmax(0,.61fr);gap:16px}.sec,.mc,.roi-bx,.cbx{background:#fff;border:1px solid #E2E8F0;border-radius:22px;box-shadow:0 8px 24px rgba(15,23,42,.05)}.sec{padding:18px;margin-bottom:14px}.st{font-size:11px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}.st:before{content:"";width:7px;height:7px;border-radius:50%;background:#2563EB;box-shadow:0 0 0 5px rgba(37,99,235,.10)}.row{margin-bottom:11px;gap:14px}.row label{font-weight:650;color:#475569}input[type=number]{padding:9px 10px;border:1px solid #E2E8F0;border-radius:12px;background:#fff;color:#0F172A;font-family:var(--font-mono);width:112px;outline:none}input[type=number]:focus{border-color:rgba(37,99,235,.65);box-shadow:0 0 0 4px rgba(37,99,235,.10)}.tog{background:#F1F5F9;border:1px solid #E2E8F0;border-radius:999px;padding:4px}.tog button{border-radius:999px;min-height:30px;font-weight:700}.tog button.on{background:#fff;color:#2563EB;box-shadow:0 5px 12px rgba(15,23,42,.08)}.addbtn{height:32px;padding:0 12px;border-radius:999px;background:#fff;font-weight:700}.pt-hd,.pt-row{grid-template-columns:78px 110px 32px;gap:7px}.delbtn{width:30px;height:30px;border-radius:10px}.fml,.fbx{padding:12px 14px;background:#F8FAFC;border:1px solid #EEF2F7;border-left:3px solid #2563EB;border-radius:14px}.mc4{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.mc{padding:20px;min-height:128px;position:relative;overflow:hidden}.mc:after{content:"";position:absolute;right:-36px;bottom:-48px;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.08),transparent 68%)}.mc .ml{font-size:12px;color:#94A3B8;margin-bottom:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.mc .mv{font-size:30px;font-weight:850;line-height:1.05;letter-spacing:-.045em;font-family:var(--font-mono)}.mc .ms{font-size:12px;color:#94A3B8;margin-top:8px}.roi-bx,.cbx{padding:20px;margin-bottom:16px}.roi-g{gap:14px}.roi-g>div{padding:16px;border:1px solid #EEF2F7;border-radius:14px;background:#F8FAFC}.rl{font-size:12px;color:#94A3B8;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.rv{font-size:26px;font-weight:850;font-family:var(--font-mono);letter-spacing:-.04em;margin-top:6px}.rs{font-size:12px;color:#94A3B8;margin-top:5px}.ct{font-size:18px;font-weight:800;letter-spacing:-.03em}.cs{font-size:13px;color:#94A3B8;margin-bottom:14px}.bdg{display:inline-flex;align-items:center;min-height:30px;font-size:12px;font-weight:800;padding:0 12px;border-radius:999px}.empty{border:1px solid #E2E8F0;border-radius:22px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)}.decision-card{margin:0 0 16px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,#0F172A,#172554);color:white;box-shadow:0 18px 48px rgba(15,23,42,.12);position:relative;overflow:hidden}.decision-card:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-100px;top:-110px;background:radial-gradient(circle,rgba(59,130,246,.34),transparent 62%)}.decision-label{color:#93C5FD;text-transform:uppercase;font-size:11px;font-weight:850;letter-spacing:.08em;margin-bottom:8px;position:relative;z-index:1}.decision-text{color:#E2E8F0;font-size:14px;line-height:1.65;position:relative;z-index:1}.footer-note{margin-top:18px;text-align:center;color:#94A3B8;font-size:12px}.cg{color:#16A34A!important}.cy{color:#B45309!important}.cr{color:#DC2626!important}.cgr{color:#94A3B8!important}@media(max-width:1080px){.hero{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.mc4{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.page-shell{padding:16px 14px 48px}.topbar{border-radius:22px;align-items:flex-start;flex-direction:column}.hero-card,.insight-card{padding:26px;border-radius:24px}.mc4,.roi-g{grid-template-columns:1fr}.calculator-shell{padding:12px;border-radius:24px}.pt-hd,.pt-row{grid-template-columns:1fr 1fr 32px}}
+
+@media(max-width:680px){
+  .sub-grid{grid-template-columns:1fr}
+  .mc4#r-breakdown{grid-template-columns:1fr}
+  .tip-box{left:auto;right:20px;top:22px;transform:none;width:min(260px,80vw)}
+  .tip-box::before{display:none}
+}
 </style>
 </head>
 <body>
 <main class="page-shell">
+<h2 class="sr-only">LTV calculator — power-law retention model with funnel, ad revenue, cost structure, and confidence bands</h2>
   <header class="topbar">
     <div class="brand"><div class="brand-mark">LTV</div><span>LTV Calculator and Prediction</span></div>
     <div class="top-meta">
@@ -201,7 +208,7 @@ body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-appl
    <div class="sec">
     <div class="sh"><span class="st">Deductions &amp; costs</span></div>
     <div class="row">
-      <label>Store fee %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">App store commission on subscription revenue. Apple / Google charge 30% by default, 15% for small businesses or after 1 year. Applied only to subscription ARPPU, not to ad revenue or in-app purchases set separately.</span></span></label>
+      <label>Store fee %<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">App store commission on paid digital goods. Applied to subscription revenue and IAP revenue. Not applied to ad mediation revenue.</span></span></label>
       <input type="number" id="i-fe" value="17" min="0" max="50" style="width:70px" oninput="upd()">
     </div>
     <div class="row">
@@ -250,11 +257,11 @@ body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-appl
     <!-- SIMPLE MODE (always visible) -->
     <div id="mon-simple">
       <div class="row">
-        <label>ARPPU ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Average Revenue Per Paying User per period — weighted average subscription price after store fee, VAT and refunds are applied. Use Advanced mode to model multiple subscription tiers separately.</span></span></label>
+        <label>ARPPU ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Gross Average Revenue Per Paying User per period before store fee, VAT and refunds. Use Advanced mode to model multiple subscription tiers separately.</span></span></label>
         <input type="number" id="i-ar" value="10.11" step="0.01" oninput="upd()">
       </div>
       <div class="row">
-        <label>Ad revenue ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Ad mediation revenue per active user per period (from all ad networks combined). Applied to all active users, not just payers. Not subject to store fee or refunds.</span></span></label>
+        <label>Ad revenue ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Ad mediation revenue per active user per period from all ad networks combined. In simple mode it is applied to all retained active users. Not subject to store fee or refunds.</span></span></label>
         <input type="number" id="i-ad" value="0.30" step="0.01" oninput="upd()">
       </div>
     </div>
@@ -339,7 +346,7 @@ body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-appl
       </div>
       <div id="iap-block" style="display:none">
         <div class="mon-src-block">
-          <div class="row"><label style="font-size:12px">IAP LTV / payer ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Total expected in-app purchase revenue per paying user over the entire cohort horizon. Spread linearly across active periods. Subject to store fee but not the subscription refund rate.</span></span></label><input type="number" id="i-iap-v" value="5.00" step="0.01" oninput="upd()" style="width:88px"></div>
+          <div class="row"><label style="font-size:12px">IAP LTV / payer ($)<span class="tip-wrap"><span class="tip-icon">i</span><span class="tip-box">Total expected gross in-app purchase revenue per paying user over the full horizon. Distributed across retained payer activity so total IAP revenue equals payer base × IAP LTV. Subject to store fee and VAT, not to subscription refund rate.</span></span></label><input type="number" id="i-iap-v" value="5.00" step="0.01" oninput="upd()" style="width:88px"></div>
         </div>
       </div>
 
@@ -546,25 +553,32 @@ function updateSplitStatus(){
   if(Math.abs(total-100)<0.01){
     el.textContent='✓ Shares sum to 100%';
     el.className='split-total split-ok';
+  } else if(total>0){
+    el.textContent='⚠ Shares sum to '+total.toFixed(0)+'% — calculation normalizes them to 100%';
+    el.className='split-total split-err';
   } else {
-    el.textContent='⚠ Shares sum to '+total.toFixed(0)+'% (need 100%)';
+    el.textContent='⚠ Shares sum to 0% — subscription revenue is set to $0';
     el.className='split-total split-err';
   }
 }
 
 /* ── ARPPU from tiers (per period in chosen period granularity) ── */
 function calcTierARPPU(){
-  const wp=gi('s-wp'),wd=gi('s-wd'),ws=gi('s-ws')/100;
-  const mp=gi('s-mp'),md=gi('s-md'),ms2=gi('s-ms')/100;
-  const ap=gi('s-ap'),ad2=gi('s-ad2'),as2=gi('s-as')/100;
+  const wp=gi('s-wp'),wd=Math.max(1,gi('s-wd')),wsRaw=gi('s-ws');
+  const mp=gi('s-mp'),md=Math.max(1,gi('s-md')),msRaw=gi('s-ms');
+  const ap=gi('s-ap'),ad2=Math.max(1,gi('s-ad2')),asRaw=gi('s-as');
+  const splitTotal=wsRaw+msRaw+asRaw;
+  const ws=splitTotal>0?wsRaw/splitTotal:0;
+  const ms2=splitTotal>0?msRaw/splitTotal:0;
+  const as2=splitTotal>0?asRaw/splitTotal:0;
   const periodDays=per==='week'?7:30.44;
-  // Revenue per payer per period = price * (periodDays / billingDays) * share
+  // Revenue recognition per payer per model period = price × (periodDays / billingDays) × normalized plan share.
+  // This is accrual-style revenue recognition, not upfront cash collection for annual plans.
   const wRev=wp*(periodDays/wd)*ws;
   const mRev=mp*(periodDays/md)*ms2;
   const aRev=ap*(periodDays/ad2)*as2;
   const gross=wRev+mRev+aRev;
-  // Also track sub-totals for breakdown
-  return{gross, weekly:wRev, monthly:mRev, annual:aRev};
+  return{gross, weekly:wRev, monthly:mRev, annual:aRev, splitTotal};
 }
 
 /* ── main update ── */
@@ -629,17 +643,28 @@ function upd(){
   /* ── per-period simulation ── */
   const spend=co*ca;
   const rows=[];let cumG=0,cumN=0,cumAd=0,cumIap=0,cumSub=0,payback=null;
-  const iapPerPeriod=pbase>0?(iapLTV*pbase)/h/pbase:0; // IAP spread per payer per period
+  const iapNetF=(1-fe/100)*(1-vt/100); // IAP is store/VAT-adjusted, but not reduced by the subscription refund rate.
+  const retentionWeights=[];
+  let payerActiveSum=0;
+  for(let t=1;t<=h;t++){
+    const retention=pR(t,fit,0);
+    const payerActive=pbase*retention;
+    retentionWeights.push({t,retention,payerActive});
+    payerActiveSum+=payerActive;
+  }
+  const iapPerActivePayer=iapLTV>0&&payerActiveSum>0?(iapLTV*pbase)/payerActiveSum:0;
   
   for(let t=1;t<=h;t++){
     const r=pR(t,fit,0)*100,rHi=pR(t,fit,1)*100,rLo=pR(t,fit,-1)*100;
-    const act=pbase*r/100;
-    const adUsers=adScope==='all'?act:act; // act for all-active, or pbase* fraction for payers
-    const subGross=act*ar;
-    const adGross=adRevPerPeriod*(adScope==='pay'?Math.min(act,pbase):act);
-    const iapGross=iapLTV>0?act*iapPerPeriod:0;
+    const retention=retentionWeights[t-1].retention;
+    const payerActive=retentionWeights[t-1].payerActive;
+    const allActive=co*retention;
+    const adUsers=adScope==='pay'?payerActive:allActive;
+    const subGross=payerActive*ar;
+    const adGross=adRevPerPeriod*adUsers;
+    const iapGross=iapPerActivePayer>0?payerActive*iapPerActivePayer:0;
     const gross=subGross+adGross+iapGross;
-    const net=subGross*netF+adGross+iapGross*netF-pFix;
+    const net=subGross*netF+adGross+iapGross*iapNetF-pFix;
     cumG+=gross;cumN+=net;cumAd+=adGross;cumIap+=iapGross;cumSub+=subGross;
     if(!payback&&cumN>=spend)payback=t;
     const actual=pts.find(p=>p.t===t)?.r??null;
