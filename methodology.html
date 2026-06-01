@@ -586,6 +586,8 @@ body {
     <span class="tag">МНК log-log</span>
     <span class="tag">±1σ доверительный интервал</span>
     <span class="tag">LTV / CAC / ROAS</span>
+    <span class="tag">Advanced monetization</span>
+    <span class="tag">Advanced monetization</span>
   </div>
 </div>
 
@@ -812,6 +814,65 @@ body {
   </div>
 </div>
 
+
+
+  <h3>Расширенный блок монетизации</h3>
+  <div class="prose">
+    <p><strong>Monetization sources</strong> — блок, который разделяет выручку на несколько источников: подписки, рекламная медиация и in-app purchases. В простом режиме используется прежняя логика: один ARPPU и один показатель рекламной выручки. В расширенном режиме подписочная выручка считается через несколько тарифов.</p>
+    <p><strong>Subscription tiers</strong> — набор тарифов подписки. Для каждого тарифа задаются цена, длина биллингового интервала в днях и доля новых подписчиков, выбравших этот тариф. В калькуляторе используются Weekly, Monthly и Annual.</p>
+    <p><strong>Split</strong> — доля новых подписчиков по каждому тарифу. Доли должны суммироваться в 100%. Если сумма отличается от 100%, калькулятор показывает предупреждение и нормализует доли для расчёта, чтобы избежать искусственного завышения или занижения ARPPU.</p>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Weighted ARPPU по подписочным тирам</div>
+    <div class="formula">
+      SubARPPU<sub>period</sub> = Σ Price<sub>i</sub> × (PeriodDays / BillingDays<sub>i</sub>) × Split<sub>i</sub><br><br>
+      Split<sub>i,norm</sub> = Split<sub>i</sub> / Σ Split<sub>i</sub>
+    </div>
+    <div class="formula-note">
+      PeriodDays = 7 для weekly-режима и 30.44 для monthly-режима<br>
+      Annual-тариф признаётся как accrual revenue: выручка распределяется по периоду модели, а не учитывается как upfront cash collection<br>
+      Weighted ARPPU в Results — это эффективный gross ARPPU по всем подписочным тирам
+    </div>
+  </div>
+
+  <div class="prose">
+    <p><strong>Ad Mediation</strong> — рекламная выручка от сетей вроде AdMob, AppLovin, ironSource и других источников. Она задаётся как revenue per active user per period. В отличие от подписок, рекламная выручка не облагается store fee и не уменьшается на refund rate.</p>
+    <p><strong>All active users</strong> означает, что реклама начисляется на всех удержанных активных пользователей исходной когорты. <strong>Payers only</strong> означает, что реклама начисляется только на удержанных платящих пользователей.</p>
+    <p><strong>In-App Purchases</strong> — разовые или расходуемые покупки внутри приложения: монеты, главы, бусты, дополнительные функции. В калькуляторе IAP задаётся как ожидаемый gross IAP LTV на одного платящего пользователя за весь горизонт. Эта сумма распределяется по удержанной активности платящих пользователей, поэтому общий IAP revenue за горизонт равен PayerBase × IAP LTV.</p>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Advanced gross revenue</div>
+    <div class="formula">
+      PayerActive(t) = P<sub>base</sub> × R(t)<br>
+      AllActive(t) = Cohort × R(t)<br><br>
+      SubGross(t) = PayerActive(t) × SubARPPU<sub>period</sub><br>
+      AdGross(t) = AdRev<sub>period</sub> × AdUsers(t)<br>
+      IAPGross(t) = PayerActive(t) × IAPPerActivePayer<br><br>
+      Gross(t) = SubGross(t) + AdGross(t) + IAPGross(t)
+    </div>
+    <div class="formula-note">
+      AdUsers(t) = AllActive(t), если выбран All active users<br>
+      AdUsers(t) = PayerActive(t), если выбран Payers only<br>
+      IAPPerActivePayer = (IAP LTV × P<sub>base</sub>) / Σ PayerActive(t)
+    </div>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Advanced net revenue</div>
+    <div class="formula">
+      SubNet(t) = SubGross(t) × NetF<br>
+      AdNet(t) = AdGross(t)<br>
+      IAPNet(t) = IAPGross(t) × IAPNetF<br><br>
+      Net(t) = SubNet(t) + AdNet(t) + IAPNet(t) − FixedCost<sub>period</sub>
+    </div>
+    <div class="formula-note">
+      NetF = (1 − fee%) × (1 − VAT%) × (1 − refund%) для подписок<br>
+      IAPNetF = (1 − fee%) × (1 − VAT%) для in-app purchases<br>
+      Рекламная выручка не уменьшается на store fee, VAT и refund rate внутри модели
+    </div>
+  </div>
 <!-- 6 -->
 <div class="section" id="ru-6">
   <div class="section-header">
@@ -1160,6 +1221,65 @@ body {
   </div>
 </div>
 
+
+
+  <h3>Advanced monetization block</h3>
+  <div class="prose">
+    <p><strong>Monetization sources</strong> separates revenue into multiple streams: subscriptions, ad mediation, and in-app purchases. In simple mode, the original logic remains: one ARPPU value and one ad revenue value. In advanced mode, subscription revenue is calculated through multiple pricing tiers.</p>
+    <p><strong>Subscription tiers</strong> are subscription plans. Each tier has a price, billing interval in days, and share of new subscribers choosing that tier. The calculator supports Weekly, Monthly, and Annual tiers.</p>
+    <p><strong>Split</strong> is the share of new subscribers assigned to each tier. Shares should sum to 100%. If the total differs from 100%, the calculator displays a warning and normalizes shares in the calculation to avoid artificially inflating or deflating ARPPU.</p>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Weighted ARPPU from subscription tiers</div>
+    <div class="formula">
+      SubARPPU<sub>period</sub> = Σ Price<sub>i</sub> × (PeriodDays / BillingDays<sub>i</sub>) × Split<sub>i</sub><br><br>
+      Split<sub>i,norm</sub> = Split<sub>i</sub> / Σ Split<sub>i</sub>
+    </div>
+    <div class="formula-note">
+      PeriodDays = 7 in weekly mode and 30.44 in monthly mode<br>
+      Annual revenue is treated as accrual revenue: it is recognized across model periods, not as upfront cash collection<br>
+      Weighted ARPPU in Results is the effective gross ARPPU across all subscription tiers
+    </div>
+  </div>
+
+  <div class="prose">
+    <p><strong>Ad Mediation</strong> is revenue from ad networks such as AdMob, AppLovin, ironSource, and similar sources. It is entered as revenue per active user per period. Unlike subscription revenue, ad revenue is not reduced by store fee or refund rate.</p>
+    <p><strong>All active users</strong> means ad revenue is applied to all retained active users from the original cohort. <strong>Payers only</strong> means ad revenue is applied only to retained paying users.</p>
+    <p><strong>In-App Purchases</strong> are one-time or consumable purchases inside the app: coins, chapters, boosts, or extra features. In the calculator, IAP is entered as expected gross IAP LTV per paying user over the full horizon. This amount is distributed across retained payer activity, so total IAP revenue over the horizon equals PayerBase × IAP LTV.</p>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Advanced gross revenue</div>
+    <div class="formula">
+      PayerActive(t) = P<sub>base</sub> × R(t)<br>
+      AllActive(t) = Cohort × R(t)<br><br>
+      SubGross(t) = PayerActive(t) × SubARPPU<sub>period</sub><br>
+      AdGross(t) = AdRev<sub>period</sub> × AdUsers(t)<br>
+      IAPGross(t) = PayerActive(t) × IAPPerActivePayer<br><br>
+      Gross(t) = SubGross(t) + AdGross(t) + IAPGross(t)
+    </div>
+    <div class="formula-note">
+      AdUsers(t) = AllActive(t) when All active users is selected<br>
+      AdUsers(t) = PayerActive(t) when Payers only is selected<br>
+      IAPPerActivePayer = (IAP LTV × P<sub>base</sub>) / Σ PayerActive(t)
+    </div>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Advanced net revenue</div>
+    <div class="formula">
+      SubNet(t) = SubGross(t) × NetF<br>
+      AdNet(t) = AdGross(t)<br>
+      IAPNet(t) = IAPGross(t) × IAPNetF<br><br>
+      Net(t) = SubNet(t) + AdNet(t) + IAPNet(t) − FixedCost<sub>period</sub>
+    </div>
+    <div class="formula-note">
+      NetF = (1 − fee%) × (1 − VAT%) × (1 − refund%) for subscriptions<br>
+      IAPNetF = (1 − fee%) × (1 − VAT%) for in-app purchases<br>
+      Ad revenue is not reduced by store fee, VAT, or refund rate inside the model
+    </div>
+  </div>
 <!-- 6 -->
 <div class="section" id="en-6">
   <div class="section-header">
