@@ -93,6 +93,27 @@ input[type=number]{padding:5px 8px;border:.5px solid var(--color-border-secondar
 
 /* Results extra rows */
 .mc8{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+
+/* ── clean topbar + tooltip case fixes ── */
+.top-meta {
+  margin-left: auto;
+}
+.tip-icon {
+  text-transform: lowercase !important;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+}
+.tip-box {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+.st .tip-wrap,
+.mon-src-title .tip-wrap {
+  text-transform: none !important;
+}
+
 </style>
 
 <style>
@@ -125,9 +146,9 @@ body{margin:0;min-height:100vh;font-family:Inter,"IBM Plex Sans",system-ui,-appl
   <header class="topbar">
     <div class="brand"><div class="brand-mark">LTV</div><span>LTV Calculator and Prediction</span></div>
     <div class="top-meta">
-      <span class="pill">Power-law retention</span>
-      <span class="pill">Subscription economics</span>
-      <span class="pill">UA payback model</span>
+      
+      
+      
       <a class="pill nav-pill" href="methodology.html">Methodology</a>
     </div>
   </header>
